@@ -1,0 +1,30 @@
+import { createFileRoute } from '@tanstack/react-router'
+import { createServerFn } from '@tanstack/react-start'
+import { supabase } from '#/lib/supabase'
+
+const checkSupabase = createServerFn({ method: 'GET' }).handler(async () => {
+  const { error } = await supabase.storage.listBuckets()
+  return error ? { ok: false, message: error.message } : { ok: true, message: 'Terhubung' }
+})
+
+export const Route = createFileRoute('/')({
+  component: Home,
+  loader: () => checkSupabase(),
+})
+
+function Home() {
+  const supabaseStatus = Route.useLoaderData()
+
+  return (
+    <main style={{ fontFamily: 'system-ui, sans-serif', padding: 24 }}>
+      <h1>Consina ERP — M0</h1>
+      <p>Fondasi proyek: TanStack Start + Bun + Supabase.</p>
+      <p>
+        Status Supabase:{' '}
+        <strong style={{ color: supabaseStatus.ok ? '#1F6F4A' : '#C8362A' }}>
+          {supabaseStatus.ok ? '✓ Terhubung' : `✗ ${supabaseStatus.message}`}
+        </strong>
+      </p>
+    </main>
+  )
+}
