@@ -31,3 +31,9 @@ membaca kode.
   butuh tabel apa pun (M1 belum jalan), tapi tetap benar-benar
   melakukan round-trip jaringan ke project Supabase — jadi bukti
   koneksi asli, bukan cuma cek konfigurasi lokal.
+- **Vercel project: tim `consina`** (https://vercel.com/consina/consina-erp),
+  bukan tim `fajrin-consina-s-projects` tempat `consina-dev` berada —
+  pemilik proyek yang membuatnya di sana. Env var
+  `VITE_SUPABASE_URL` / `VITE_SUPABASE_PUBLISHABLE_KEY` sudah diisi
+  di dashboard Vercel project itu. Live URL: https://consina-erp.vercel.app
+  (halaman menampilkan "✓ Terhubung" — sudah diverifikasi).
