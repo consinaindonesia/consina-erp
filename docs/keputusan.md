@@ -87,3 +87,38 @@ membaca kode.
   karena belum ada transaksi — itu sudah benar, bukan berpura-pura
   lulus). Pembuktian jalur bisnis penuh (beli→produksi→transfer→
   jual→retur→opname) adalah tugas M2, bukan M1.
+
+## M2 — Gerbang kebenaran (2026-07-30)
+
+- **"Carrier" di skrip rencana-build.md diganti dengan "Jaket Consina
+  Champers Hill"** (satu-satunya produk manufaktur yang ada dari seed
+  M1) — nama produk di skrip aslinya cuma contoh generik, bukan nama
+  wajib.
+- **Beli 3 bahan baku sekaligus di langkah 1** (kain 100m, resleting
+  20pcs, webbing 15m), bukan cuma kain seperti tertulis di skrip.
+  Kalau cuma beli kain lalu langsung produksi (butuh resleting &
+  webbing juga), stok fisik resleting/webbing akan minus — itu
+  pelanggaran nyata yang mestinya ditangkap cek kesehatan #2, bukan
+  cara sah untuk lolos ujian ini.
+- **Siklus penuh dijalankan dan disimpan permanen** (bukan uji-lalu-
+  rollback seperti verifikasi hukum di M1) — referensi tiap gerakan
+  diberi awalan `M2/...` supaya gampang dibedakan dari data asli nanti.
+  Urutan: beli bahan (M2/PEMBELIAN-01) → produksi 10 unit
+  (M2/PRODUKSI-01, dua stock_move: konsumsi bahan + hasil produksi,
+  keduanya terhubung ke manufacturing_order lewat production_id) →
+  transfer 4 unit ke Toko Bogor lewat transit, dua langkah
+  (M2/TRANSFER-01-KIRIM lalu -TERIMA) → jual 1 unit, sesi dibuka lalu
+  ditutup (M2/POS-0001 — stok BARU dibukukan saat tutup sesi, dalam
+  satu statement SQL bareng update status sesi & order, sesuai hukum
+  #5) → retur 1 unit (M2/RETUR-01, pakai kolom `reversal_of_id` yang
+  memang disiapkan untuk ini) → stock opname, fisik kurang 1 unit
+  (M2/OPNAME-01, masuk ke lokasi virtual inventory_loss).
+- **Hasil: cek-kesehatan 9/9 OK di SETIAP langkah** (bukan cuma di
+  akhir), dan saldo akhir Jaket Hitam bisa dilacak persis:
+  6 unit di Gudang Pusat, 3 unit di Toko Bogor, 1 unit tercatat
+  hilang (opname) — totalnya pas sama dengan 10 yang diproduksi
+  dikurangi apa yang sudah terjual/hilang.
+- **Trigger `apply_move_line` dan penjaga stock_quant/stock_move_line
+  terbukti bekerja di jalur nyata**, bukan cuma di uji sintetis M1 —
+  setiap kali stock_move_line di-INSERT, stock_quant otomatis
+  ter-update dengan benar tanpa satu pun UPDATE manual dari skrip ini.
