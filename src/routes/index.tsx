@@ -18,14 +18,14 @@ function Home() {
 
   return (
     <main style={{ fontFamily: 'system-ui, sans-serif', padding: 24 }}>
-      <h1>Consina ERP — M0</h1>
-      <p>Fondasi proyek: TanStack Start + Bun + Supabase.</p>
+      <h1>Consina ERP</h1>
       <p>
         Status Supabase:{' '}
         <strong style={{ color: supabaseStatus.ok ? '#1F6F4A' : '#C8362A' }}>
           {supabaseStatus.ok ? '✓ Terhubung' : `✗ ${supabaseStatus.message}`}
         </strong>
       </p>
+      <p>Gunakan menu di atas untuk kelola produk, kategori, satuan, atribut, dan lokasi.</p>
     </main>
   )
 }

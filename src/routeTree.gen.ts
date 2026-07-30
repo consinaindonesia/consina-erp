@@ -10,33 +10,128 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AttributesRouteImport } from './routes/attributes'
+import { Route as CategoriesRouteImport } from './routes/categories'
+import { Route as LocationsRouteImport } from './routes/locations'
+import { Route as UomRouteImport } from './routes/uom'
+import { Route as ProductsIndexRouteImport } from './routes/products/index'
+import { Route as ProductsTemplateIdRouteImport } from './routes/products/$templateId'
+import { Route as ProductsNewRouteImport } from './routes/products/new'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AttributesRoute = AttributesRouteImport.update({
+  id: '/attributes',
+  path: '/attributes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CategoriesRoute = CategoriesRouteImport.update({
+  id: '/categories',
+  path: '/categories',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LocationsRoute = LocationsRouteImport.update({
+  id: '/locations',
+  path: '/locations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UomRoute = UomRouteImport.update({
+  id: '/uom',
+  path: '/uom',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProductsIndexRoute = ProductsIndexRouteImport.update({
+  id: '/products/',
+  path: '/products/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProductsTemplateIdRoute = ProductsTemplateIdRouteImport.update({
+  id: '/products/$templateId',
+  path: '/products/$templateId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProductsNewRoute = ProductsNewRouteImport.update({
+  id: '/products/new',
+  path: '/products/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/attributes': typeof AttributesRoute
+  '/categories': typeof CategoriesRoute
+  '/locations': typeof LocationsRoute
+  '/uom': typeof UomRoute
+  '/products/$templateId': typeof ProductsTemplateIdRoute
+  '/products/new': typeof ProductsNewRoute
+  '/products/': typeof ProductsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/attributes': typeof AttributesRoute
+  '/categories': typeof CategoriesRoute
+  '/locations': typeof LocationsRoute
+  '/uom': typeof UomRoute
+  '/products/$templateId': typeof ProductsTemplateIdRoute
+  '/products/new': typeof ProductsNewRoute
+  '/products': typeof ProductsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/attributes': typeof AttributesRoute
+  '/categories': typeof CategoriesRoute
+  '/locations': typeof LocationsRoute
+  '/uom': typeof UomRoute
+  '/products/$templateId': typeof ProductsTemplateIdRoute
+  '/products/new': typeof ProductsNewRoute
+  '/products/': typeof ProductsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/attributes'
+    | '/categories'
+    | '/locations'
+    | '/uom'
+    | '/products/$templateId'
+    | '/products/new'
+    | '/products/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/attributes'
+    | '/categories'
+    | '/locations'
+    | '/uom'
+    | '/products/$templateId'
+    | '/products/new'
+    | '/products'
+  id:
+    | '__root__'
+    | '/'
+    | '/attributes'
+    | '/categories'
+    | '/locations'
+    | '/uom'
+    | '/products/$templateId'
+    | '/products/new'
+    | '/products/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AttributesRoute: typeof AttributesRoute
+  CategoriesRoute: typeof CategoriesRoute
+  LocationsRoute: typeof LocationsRoute
+  UomRoute: typeof UomRoute
+  ProductsTemplateIdRoute: typeof ProductsTemplateIdRoute
+  ProductsNewRoute: typeof ProductsNewRoute
+  ProductsIndexRoute: typeof ProductsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +143,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/attributes': {
+      id: '/attributes'
+      path: '/attributes'
+      fullPath: '/attributes'
+      preLoaderRoute: typeof AttributesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/categories': {
+      id: '/categories'
+      path: '/categories'
+      fullPath: '/categories'
+      preLoaderRoute: typeof CategoriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/locations': {
+      id: '/locations'
+      path: '/locations'
+      fullPath: '/locations'
+      preLoaderRoute: typeof LocationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/uom': {
+      id: '/uom'
+      path: '/uom'
+      fullPath: '/uom'
+      preLoaderRoute: typeof UomRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/products/': {
+      id: '/products/'
+      path: '/products'
+      fullPath: '/products/'
+      preLoaderRoute: typeof ProductsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/products/$templateId': {
+      id: '/products/$templateId'
+      path: '/products/$templateId'
+      fullPath: '/products/$templateId'
+      preLoaderRoute: typeof ProductsTemplateIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/products/new': {
+      id: '/products/new'
+      path: '/products/new'
+      fullPath: '/products/new'
+      preLoaderRoute: typeof ProductsNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AttributesRoute: AttributesRoute,
+  CategoriesRoute: CategoriesRoute,
+  LocationsRoute: LocationsRoute,
+  UomRoute: UomRoute,
+  ProductsTemplateIdRoute: ProductsTemplateIdRoute,
+  ProductsNewRoute: ProductsNewRoute,
+  ProductsIndexRoute: ProductsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

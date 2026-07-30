@@ -122,3 +122,44 @@ membaca kode.
   terbukti bekerja di jalur nyata**, bukan cuma di uji sintetis M1 —
   setiap kali stock_move_line di-INSERT, stock_quant otomatis
   ter-update dengan benar tanpa satu pun UPDATE manual dari skrip ini.
+
+## M3 — Master data / UI pertama (2026-07-30)
+
+- **Akses ke database lewat `service_role` key di server, bukan RLS
+  policy untuk anon key.** Semua tabel masih terkunci total dari API
+  publik (M1). Belum ada sistem login sama sekali (tidak disebut di
+  rencana-build.md sampai M7), jadi cara paling aman & sederhana:
+  browser TIDAK PERNAH bicara langsung ke Supabase — semua lewat
+  server function TanStack Start (`src/server/*.ts`), yang jalan di
+  server pakai `SUPABASE_SERVICE_ROLE_KEY` (env var server-only, tidak
+  pernah dikirim ke browser). Kalau nanti butuh multi-user dengan hak
+  akses berbeda, baru itu saatnya tambah auth + RLS policy sungguhan.
+- **Logika bisnis dipisah dari `createServerFn`**, mis.
+  `createProductImpl(admin, data)` vs `createProduct = createServerFn(...)`.
+  Bukan cuma soal rapi — ini yang bikin fungsi itu bisa dites langsung
+  di Vitest tanpa perlu jalur HTTP/RPC framework.
+- **Test otomatis = pengulangan persis "cara cek" M3 sendiri**:
+  `tests/products.test.ts` menambah 1 produk + 3 varian lewat kode
+  yang sama persis dipakai UI, memverifikasi hasilnya di Supabase,
+  lalu membersihkan diri sendiri. Dijalankan terhadap project
+  Supabase asli (belum ada project Supabase khusus untuk testing) —
+  makanya nama data uji selalu diawali `TEST/` supaya gampang
+  dibedakan & aman dihapus.
+- **Tipe TypeScript digenerate dari skema asli** (`generate_typescript_types`,
+  disimpan di `src/lib/database.types.ts`, jangan diedit tangan — generate
+  ulang tiap ada migrasi skema). Awalnya dicoba tanpa ini, tapi
+  linter langsung menangkap bug nyata: kode mengira `location.warehouse`
+  selalu ada padahal kolomnya nullable (lokasi virtual tidak punya
+  gudang) — tanpa tipe asli, TypeScript tidak tahu itu, dan checker
+  yang menganggap "optional chaining ini tidak perlu" jadi salah.
+- **Tambah/edit dibatasi ke field dasar** (nama, kategori, satuan,
+  harga, SKU, barcode, aktif) — belum ada UI ubah atribut/varian
+  sebuah varian yang sudah ada (misal ganti warna). Itu bukan yang
+  diminta "cara cek" M3 (tambah 1 produk 3 varian), jadi belum
+  dibangun; bisa menyusul kalau memang dibutuhkan.
+- **Tidak ada RPC/transaksi Postgres untuk create-produk-dengan-varian**
+  (beberapa INSERT sekuensial biasa lewat supabase-js). Aturan
+  "satu transaksi" di CLAUDE.md bagian 2 ditujukan untuk operasi stok/
+  kasir/produksi (poin 5 menyebut contoh: tutup sesi, konfirmasi MO,
+  terima barang) — bukan CRUD katalog. Kalau nanti perlu, gampang
+  dibungkus jadi RPC.
