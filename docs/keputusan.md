@@ -211,3 +211,68 @@ membaca kode.
   `scroll_to` + klik lewat `ref` segar. Transfer uji coba lewat UI
   (5 unit JCH-BK, 00GBJ→15BGR) berhasil dan langsung dipulihkan lagi
   lewat transfer balik supaya saldo akhir tetap sama seperti akhir M2.
+
+## M5 — Kasir offline-first (2026-08-04)
+
+- **Arsitektur offline: sesi dibuka online, transaksi jalan offline,
+  sinkron pakai antrean.** "Buka Sesi" tetap butuh internet sekali di
+  awal (bikin baris `pos_session`, cache katalog produk ke IndexedDB).
+  Setelah itu, cari produk/tambah keranjang/bayar/cetak struk semua
+  murni IndexedDB — tidak ada panggilan jaringan sama sekali di jalur
+  itu. Ini pola yang sama dipakai POS offline sungguhan (Odoo POS,
+  Square, dst): sesi selalu online, transaksi boleh offline.
+- **Lingkup "offline" yang dibangun: tab yang SUDAH terbuka tetap bisa
+  jual walau internet mati — BUKAN "buka browser baru sambil offline
+  bisa langsung jualan."** Yang kedua butuh service worker (PWA app-
+  shell caching) supaya HTML/JS-nya sendiri bisa dimuat tanpa jaringan;
+  itu di luar cakupan M5 kali ini karena scaffold TanStack Start belum
+  ada infrastruktur PWA. Skenario resmi di rencana-build.md ("nyalakan
+  mode pesawat di HP, jual 5 barang") cocok dengan lingkup ini — kasir
+  yang sedang dipakai, bukan yang baru dibuka.
+- **Harga final DIHITUNG ULANG di server saat sinkron dari
+  `product_template.sale_price` terkini**, bukan dipercaya dari angka
+  yang di-cache di HP kasir. Kalau harga berubah selagi offline, total
+  yang tercatat akan beda dari yang ditampilkan ke pelanggan saat
+  transaksi — itu risiko nyata pada sistem offline mana pun, sengaja
+  tidak "ditutupi" di sini; cek-kesehatan #5 justru akan menangkapnya
+  kalau pernah terjadi beneran, bukan pura-pura selalu cocok.
+- **Idempoten dijamin di server via `fn_sync_pos_order`**: `client_uuid`
+  unik (kolom sudah ada sejak M1) dicek dulu sebelum insert — kalau
+  sudah ada, kembalikan id yang lama, jangan bikin baris baru. Disinkron
+  dua kali dari klien manapun hasilnya tetap sama.
+- **BUG NYATA ditemukan & diperbaiki saat verifikasi manual**: kode
+  sinkron di klien awalnya cuma mengandalkan "kalau `syncPosOrder` tidak
+  melempar error, berarti berhasil." Saat proses dev di-restart di
+  tengah tes (skenario tiruan untuk simulasi offline→online), panggilan
+  itu RESOLVE tanpa error sama sekali walau server sebenarnya gagal
+  (error khusus dev-mode "Invalid server function ID") — akibatnya 4
+  struk ditandai "tersinkron" di IndexedDB padahal tidak pernah sampai
+  ke Supabase. Diperbaiki dengan validasi eksplisit: hasil sinkron HARUS
+  punya `orderId` bertipe string sebelum ditandai tersinkron; kalau
+  tidak, dianggap gagal. Juga ditambah penjaga supaya sinkron tidak
+  boleh jalan tumpang tindih (interval berkala + event `online` + klik
+  manual bisa saling tabrakan). Pelajaran: "tidak melempar error" tidak
+  cukup jadi bukti sukses untuk data keuangan — harus ada bukti bentuk
+  responsnya benar.
+- **Tes otomatis (`tests/pos-sync.test.ts`) mengulang persis kriteria
+  M5 sendiri**: 5 client_uuid disiapkan (simulasi antrean offline),
+  disinkron sekali → tepat 5 struk; disinkron LAGI dengan client_uuid
+  yang sama → tetap 5, bukan 10. Sempat gagal dua kali karena bug di
+  tes itu sendiri (bukan di sistem): (1) `RM-WEBB` dipakai sebagai
+  barang jualan padahal harganya 0 (bahan baku, bukan produk jadi) —
+  bikin cek-kesehatan #5 salah menuduh struk tidak seimbang; (2)
+  `order_no` di tes memakai string tetap yang bentrok dengan hasil
+  tes sebelumnya (order_no unik selamanya, tidak boleh dipakai ulang).
+  Kedua pelajaran ini jadi alasan kenapa file tes sekarang pakai
+  `runTag` acak dan produk sungguhan (JCH-BK) yang punya harga jual.
+- **`fileParallelism: false` ditambahkan ke `vitest.config.ts`**: semua
+  file tes berjalan lawan SATU project Supabase asli yang sama (bukan
+  database per-tes yang terisolasi). Dua file tes yang kebetulan pakai
+  gudang/varian yang sama sempat saling ganggu saldonya saat jalan
+  paralel — jadi tes dipaksa berurutan sejak M4/M5 ini.
+- **10 struk uji (`TEST/M5-...`, RM-WEBB seharga 0) yang sempat lolos
+  sebelum bug di atas ketahuan ditandai `cancelled`**, bukan dihapus —
+  sesuai hukum #6 CLAUDE.md (jangan hapus data keuangan, pakai status).
+  5 struk uji manual lewat UI (`POS/...`, JCH-BK/JCH-NV, harga benar,
+  seimbang) dibiarkan sebagai `posted` — datanya valid, cuma memang
+  transaksi demo, bukan dihapus atau di-cancel.

@@ -14,6 +14,7 @@ import { Route as AttributesRouteImport } from './routes/attributes'
 import { Route as CategoriesRouteImport } from './routes/categories'
 import { Route as LocationsRouteImport } from './routes/locations'
 import { Route as OpnameRouteImport } from './routes/opname'
+import { Route as PosRouteImport } from './routes/pos'
 import { Route as ReceivingRouteImport } from './routes/receiving'
 import { Route as TransferRouteImport } from './routes/transfer'
 import { Route as UomRouteImport } from './routes/uom'
@@ -44,6 +45,11 @@ const LocationsRoute = LocationsRouteImport.update({
 const OpnameRoute = OpnameRouteImport.update({
   id: '/opname',
   path: '/opname',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PosRoute = PosRouteImport.update({
+  id: '/pos',
+  path: '/pos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReceivingRoute = ReceivingRouteImport.update({
@@ -83,6 +89,7 @@ export interface FileRoutesByFullPath {
   '/categories': typeof CategoriesRoute
   '/locations': typeof LocationsRoute
   '/opname': typeof OpnameRoute
+  '/pos': typeof PosRoute
   '/receiving': typeof ReceivingRoute
   '/transfer': typeof TransferRoute
   '/uom': typeof UomRoute
@@ -96,6 +103,7 @@ export interface FileRoutesByTo {
   '/categories': typeof CategoriesRoute
   '/locations': typeof LocationsRoute
   '/opname': typeof OpnameRoute
+  '/pos': typeof PosRoute
   '/receiving': typeof ReceivingRoute
   '/transfer': typeof TransferRoute
   '/uom': typeof UomRoute
@@ -110,6 +118,7 @@ export interface FileRoutesById {
   '/categories': typeof CategoriesRoute
   '/locations': typeof LocationsRoute
   '/opname': typeof OpnameRoute
+  '/pos': typeof PosRoute
   '/receiving': typeof ReceivingRoute
   '/transfer': typeof TransferRoute
   '/uom': typeof UomRoute
@@ -125,6 +134,7 @@ export interface FileRouteTypes {
     | '/categories'
     | '/locations'
     | '/opname'
+    | '/pos'
     | '/receiving'
     | '/transfer'
     | '/uom'
@@ -138,6 +148,7 @@ export interface FileRouteTypes {
     | '/categories'
     | '/locations'
     | '/opname'
+    | '/pos'
     | '/receiving'
     | '/transfer'
     | '/uom'
@@ -151,6 +162,7 @@ export interface FileRouteTypes {
     | '/categories'
     | '/locations'
     | '/opname'
+    | '/pos'
     | '/receiving'
     | '/transfer'
     | '/uom'
@@ -165,6 +177,7 @@ export interface RootRouteChildren {
   CategoriesRoute: typeof CategoriesRoute
   LocationsRoute: typeof LocationsRoute
   OpnameRoute: typeof OpnameRoute
+  PosRoute: typeof PosRoute
   ReceivingRoute: typeof ReceivingRoute
   TransferRoute: typeof TransferRoute
   UomRoute: typeof UomRoute
@@ -208,6 +221,13 @@ declare module '@tanstack/react-router' {
       path: '/opname'
       fullPath: '/opname'
       preLoaderRoute: typeof OpnameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pos': {
+      id: '/pos'
+      path: '/pos'
+      fullPath: '/pos'
+      preLoaderRoute: typeof PosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/receiving': {
@@ -261,6 +281,7 @@ const rootRouteChildren: RootRouteChildren = {
   CategoriesRoute: CategoriesRoute,
   LocationsRoute: LocationsRoute,
   OpnameRoute: OpnameRoute,
+  PosRoute: PosRoute,
   ReceivingRoute: ReceivingRoute,
   TransferRoute: TransferRoute,
   UomRoute: UomRoute,

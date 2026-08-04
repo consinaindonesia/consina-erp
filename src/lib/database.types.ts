@@ -852,6 +852,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      fn_close_pos_session: {
+        Args: { p_counted_cash: number; p_session_id: string }
+        Returns: undefined
+      }
+      fn_sync_pos_order: {
+        Args: {
+          p_client_uuid: string
+          p_lines: Json
+          p_order_no: string
+          p_payments: Json
+          p_session_id: string
+        }
+        Returns: string
+      }
       fn_receive_goods: {
         Args: {
           p_dest_location_id: string

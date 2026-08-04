@@ -7,8 +7,12 @@ type Line = { variant_id: string; qty: number }
 function makeReference(prefix: string) {
   const now = new Date()
   const pad = (n: number) => String(n).padStart(2, '0')
-  const stamp = `${String(now.getFullYear()).slice(2)}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`
-  return `${prefix}/${stamp}`
+  // Termasuk milidetik + acak: dua panggilan dalam detik yang sama (biasa
+  // terjadi saat tes otomatis, atau klik cepat berturut-turut) tetap harus
+  // menghasilkan reference unik.
+  const stamp = `${String(now.getFullYear()).slice(2)}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}${String(now.getMilliseconds()).padStart(3, '0')}`
+  const rand = Math.random().toString(36).slice(2, 6)
+  return `${prefix}/${stamp}-${rand}`
 }
 
 export const listVariantsForPicker = createServerFn({ method: 'GET' }).handler(async () => {

@@ -10,6 +10,7 @@ const links = [
   { to: '/receiving', label: 'Penerimaan' },
   { to: '/transfer', label: 'Transfer' },
   { to: '/opname', label: 'Opname' },
+  { to: '/pos', label: 'Kasir' },
 ] as const
 
 export function Nav() {
