@@ -13,6 +13,7 @@ const links = [
   { to: '/pos', label: 'Kasir' },
   { to: '/production', label: 'Produksi' },
   { to: '/work-centers', label: 'Work Center' },
+  { to: '/reports', label: 'Laporan' },
 ] as const
 
 export function Nav() {

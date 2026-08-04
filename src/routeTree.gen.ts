@@ -17,6 +17,7 @@ import { Route as OpnameRouteImport } from './routes/opname'
 import { Route as PosRouteImport } from './routes/pos'
 import { Route as ProductionRouteImport } from './routes/production'
 import { Route as ReceivingRouteImport } from './routes/receiving'
+import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as TransferRouteImport } from './routes/transfer'
 import { Route as UomRouteImport } from './routes/uom'
 import { Route as WorkCentersRouteImport } from './routes/work-centers'
@@ -64,6 +65,11 @@ const ReceivingRoute = ReceivingRouteImport.update({
   path: '/receiving',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ReportsRoute = ReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TransferRoute = TransferRouteImport.update({
   id: '/transfer',
   path: '/transfer',
@@ -104,6 +110,7 @@ export interface FileRoutesByFullPath {
   '/pos': typeof PosRoute
   '/production': typeof ProductionRoute
   '/receiving': typeof ReceivingRoute
+  '/reports': typeof ReportsRoute
   '/transfer': typeof TransferRoute
   '/uom': typeof UomRoute
   '/work-centers': typeof WorkCentersRoute
@@ -120,6 +127,7 @@ export interface FileRoutesByTo {
   '/pos': typeof PosRoute
   '/production': typeof ProductionRoute
   '/receiving': typeof ReceivingRoute
+  '/reports': typeof ReportsRoute
   '/transfer': typeof TransferRoute
   '/uom': typeof UomRoute
   '/work-centers': typeof WorkCentersRoute
@@ -137,6 +145,7 @@ export interface FileRoutesById {
   '/pos': typeof PosRoute
   '/production': typeof ProductionRoute
   '/receiving': typeof ReceivingRoute
+  '/reports': typeof ReportsRoute
   '/transfer': typeof TransferRoute
   '/uom': typeof UomRoute
   '/work-centers': typeof WorkCentersRoute
@@ -155,6 +164,7 @@ export interface FileRouteTypes {
     | '/pos'
     | '/production'
     | '/receiving'
+    | '/reports'
     | '/transfer'
     | '/uom'
     | '/work-centers'
@@ -171,6 +181,7 @@ export interface FileRouteTypes {
     | '/pos'
     | '/production'
     | '/receiving'
+    | '/reports'
     | '/transfer'
     | '/uom'
     | '/work-centers'
@@ -187,6 +198,7 @@ export interface FileRouteTypes {
     | '/pos'
     | '/production'
     | '/receiving'
+    | '/reports'
     | '/transfer'
     | '/uom'
     | '/work-centers'
@@ -204,6 +216,7 @@ export interface RootRouteChildren {
   PosRoute: typeof PosRoute
   ProductionRoute: typeof ProductionRoute
   ReceivingRoute: typeof ReceivingRoute
+  ReportsRoute: typeof ReportsRoute
   TransferRoute: typeof TransferRoute
   UomRoute: typeof UomRoute
   WorkCentersRoute: typeof WorkCentersRoute
@@ -270,6 +283,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReceivingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reports': {
+      id: '/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof ReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/transfer': {
       id: '/transfer'
       path: '/transfer'
@@ -324,6 +344,7 @@ const rootRouteChildren: RootRouteChildren = {
   PosRoute: PosRoute,
   ProductionRoute: ProductionRoute,
   ReceivingRoute: ReceivingRoute,
+  ReportsRoute: ReportsRoute,
   TransferRoute: TransferRoute,
   UomRoute: UomRoute,
   WorkCentersRoute: WorkCentersRoute,

@@ -359,3 +359,73 @@ membaca kode.
   UX supaya alur terasa natural, bukan aturan bisnis yang keras.
 - **Halaman `/work-centers`**: CRUD sederhana untuk kelola work center
   (kode + nama), pola yang sama seperti `/categories`.
+
+## M7 — Laporan & titik pesan ulang (2026-08-04, milestone terakhir di rencana-build.md)
+
+- **Semua laporan adalah fungsi SQL baca-saja (`language sql stable`),
+  bukan tabel/view baru**: tidak ada perubahan skema sama sekali di
+  M7 — cuma menambah cara membaca data yang sudah ada. Konsisten
+  dengan hukum #4 (tidak ada perhitungan di frontend): saldo
+  berjalan, total nilai, dan usulan pesan ulang semuanya dihitung di
+  Postgres; React cuma menampilkan tabel.
+- **Definisi "saldo" di kartu stok (`fn_stock_card`) adalah saldo
+  MILIK PERUSAHAAN (dijumlah dari semua lokasi fisik/internal), bukan
+  saldo satu lokasi**: perpindahan gudang pusat -> toko TIDAK mengubah
+  angka ini (barang cuma pindah tempat, bukan masuk/keluar
+  perusahaan); pembelian (supplier -> internal) menambahnya; penjualan
+  (internal -> customer) menguranginya. Definisi ini dipilih karena
+  paling langsung menjawab kriteria milestone: "dirunut dari
+  pembelian sampai penjualan tanpa lompatan angka" — kalau saldo
+  dihitung per-lokasi, transfer antar gudang akan terlihat seperti
+  "barang hilang lalu muncul lagi", padahal sebenarnya cuma pindah.
+  Dites lewat `tests/reports.test.ts` dengan urutan pergerakan
+  terkontrol penuh (beli → kirim ke transit → diterima toko → "terjual"
+  ke pelanggan) yang sengaja net nol di akhir, dan diverifikasi SETIAP
+  baris (bukan cuma yang baru ditambahkan tesnya) — saldo baris ini
+  harus persis saldo baris sebelumnya + perubahan baris ini, tanpa
+  kecuali, di SELURUH riwayat sejak M2.
+- **`reorder_point` (kolom yang sudah ada sejak M1 tapi belum pernah
+  dipakai) diperlakukan sebagai batas minimum PER LOKASI, bukan total
+  perusahaan**: dicek di tiap gudang/toko secara terpisah. Ini yang
+  memungkinkan tiga jenis usulan berbeda: "Transfer dari Gudang Pusat"
+  (toko kosong, tapi pusat masih ada stok cukup), "Produksi" (barang
+  buatan sendiri dan pusat pun kurang), "Beli dari supplier" (bahan
+  baku dan kurang). Kalau reorder_point diperlakukan sebagai total
+  perusahaan, tidak mungkin membedakan "toko kosong tapi pusat penuh"
+  dari "seluruh perusahaan memang kekurangan" — padahal itu dua
+  masalah yang solusinya beda sama sekali.
+- **Bahan baku (is_manufactured = false) sengaja DIKECUALIKAN dari
+  pengecekan reorder di lokasi toko**: toko tidak pernah menyetok
+  bahan baku (cuma jual barang jadi), jadi "toko kosong bahan baku"
+  itu normal, bukan kekurangan. Awalnya laporan menyertakan ini dan
+  hasilnya penuh baris palsu (semua toko "kekurangan" kain/resleting/
+  webbing) — ketahuan langsung saat baca hasil laporan sendiri,
+  diperbaiki dengan migrasi tambahan sebelum lanjut ke kode aplikasi.
+- **`reorder_point` semua produk masih 0 dari M1-M6** (belum pernah
+  diisi milestone manapun) — diisi contoh nilai realistis untuk
+  demo (Kain Ripstop 100, Resleting 20, Webbing 15, Jaket 5) lewat
+  UPDATE langsung, BUKAN via RPC/ledger, karena `reorder_point` cuma
+  kolom pengaturan biasa di `product_template` (sama seperti
+  `sale_price`/`cost_price`), sudah bisa diedit dari halaman produk
+  M3 — bukan data ledger yang dilindungi hukum #1-3. Pemilik bisa
+  ubah kapan saja lewat halaman Produk.
+- **BUG ditemukan saat verifikasi mandiri (bukan di kode M7)**: saat
+  membangun ulang laporan berkali-kali sambil menguji, satu percobaan
+  awal (sebelum bug diperbaiki) sempat gagal SETELAH mengubah stok
+  tapi SEBELUM sempat membalikkannya — mirip kejadian di M6.
+  Ditemukan lewat pengecekan silang manual (bandingkan kartu stok vs
+  `cek-kesehatan.sql`), diperbaiki dengan operasi balik terkontrol,
+  diverifikasi ulang sampai `cek-kesehatan.sql` kembali 9/9 OK.
+  Pelajaran yang sama dengan M6 tetap berlaku: setiap koreksi manual
+  ke database live wajib diverifikasi ulang, jangan percaya
+  perhitungan sendiri begitu saja.
+- **`fn_sales_by_store` menerima parameter tanggal opsional**
+  (`p_from`, `p_to`) meski UI M7 saat ini belum punya input tanggal
+  di layar — fungsinya sudah siap dipakai kalau nanti pemilik minta
+  filter periode, tanpa perlu migrasi baru. Bukan YAGNI karena
+  parameternya nol biaya tambahan (SQL sudah butuh WHERE, tinggal
+  jadikan opsional) dan tidak menambah kerumitan UI yang belum
+  diminta.
+- **Ini milestone terakhir di `rencana-build.md`.** Semua M0–M7
+  selesai. Langkah selanjutnya (kalau ada) di luar rencana asli —
+  tunggu instruksi pemilik proyek, bukan diasumsikan.

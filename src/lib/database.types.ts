@@ -1002,6 +1002,18 @@ export type Database = {
         }
         Returns: string
       }
+      fn_inventory_value: {
+        Args: never
+        Returns: {
+          cost_price: number
+          product_name: string
+          qty_on_hand: number
+          sku: string
+          total_value: number
+          variant_id: string
+        }[]
+      }
+      fn_inventory_value_total: { Args: never; Returns: number }
       fn_receive_goods: {
         Args: {
           p_dest_location_id: string
@@ -1010,6 +1022,46 @@ export type Database = {
           p_src_location_id: string
         }
         Returns: string
+      }
+      fn_reorder_suggestions: {
+        Args: never
+        Returns: {
+          central_qty_on_hand: number
+          product_name: string
+          qty_on_hand: number
+          reorder_point: number
+          sku: string
+          suggestion: string
+          variant_id: string
+          warehouse_code: string
+          warehouse_id: string
+          warehouse_name: string
+        }[]
+      }
+      fn_sales_by_store: {
+        Args: { p_from?: string; p_to?: string }
+        Returns: {
+          order_count: number
+          qty_sold: number
+          revenue: number
+          warehouse_code: string
+          warehouse_id: string
+          warehouse_name: string
+        }[]
+      }
+      fn_stock_card: {
+        Args: { p_variant_id: string }
+        Returns: {
+          dest_name: string
+          dest_usage: string
+          happened_at: string
+          net_change: number
+          qty: number
+          reference: string
+          running_balance: number
+          src_name: string
+          src_usage: string
+        }[]
       }
       fn_stock_opname: {
         Args: { p_counts: Json; p_location_id: string; p_reference: string }
