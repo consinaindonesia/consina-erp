@@ -7,6 +7,9 @@ const links = [
   { to: '/uom', label: 'Satuan' },
   { to: '/attributes', label: 'Atribut' },
   { to: '/locations', label: 'Lokasi' },
+  { to: '/receiving', label: 'Penerimaan' },
+  { to: '/transfer', label: 'Transfer' },
+  { to: '/opname', label: 'Opname' },
 ] as const
 
 export function Nav() {

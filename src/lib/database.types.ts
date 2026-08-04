@@ -578,6 +578,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "stock_move_picking_fk"
+            columns: ["picking_id"]
+            isOneToOne: false
+            referencedRelation: "stock_picking"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "stock_move_pos_order_fk"
             columns: ["pos_order_id"]
             isOneToOne: false
@@ -665,6 +672,54 @@ export type Database = {
             columns: ["variant_id"]
             isOneToOne: false
             referencedRelation: "product_variant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stock_picking: {
+        Row: {
+          created_at: string
+          dest_location_id: string
+          done_at: string | null
+          id: string
+          reference: string
+          src_location_id: string
+          state: string
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          dest_location_id: string
+          done_at?: string | null
+          id?: string
+          reference: string
+          src_location_id: string
+          state?: string
+          type: string
+        }
+        Update: {
+          created_at?: string
+          dest_location_id?: string
+          done_at?: string | null
+          id?: string
+          reference?: string
+          src_location_id?: string
+          state?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_picking_dest_location_id_fkey"
+            columns: ["dest_location_id"]
+            isOneToOne: false
+            referencedRelation: "location"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_picking_src_location_id_fkey"
+            columns: ["src_location_id"]
+            isOneToOne: false
+            referencedRelation: "location"
             referencedColumns: ["id"]
           },
         ]
@@ -797,7 +852,32 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      fn_receive_goods: {
+        Args: {
+          p_dest_location_id: string
+          p_lines: Json
+          p_reference: string
+          p_src_location_id: string
+        }
+        Returns: string
+      }
+      fn_stock_opname: {
+        Args: { p_counts: Json; p_location_id: string; p_reference: string }
+        Returns: string
+      }
+      fn_transfer_receive: {
+        Args: { p_picking_id: string }
+        Returns: undefined
+      }
+      fn_transfer_send: {
+        Args: {
+          p_dest_warehouse_id: string
+          p_lines: Json
+          p_reference: string
+          p_src_location_id: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never

@@ -13,6 +13,9 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AttributesRouteImport } from './routes/attributes'
 import { Route as CategoriesRouteImport } from './routes/categories'
 import { Route as LocationsRouteImport } from './routes/locations'
+import { Route as OpnameRouteImport } from './routes/opname'
+import { Route as ReceivingRouteImport } from './routes/receiving'
+import { Route as TransferRouteImport } from './routes/transfer'
 import { Route as UomRouteImport } from './routes/uom'
 import { Route as ProductsIndexRouteImport } from './routes/products/index'
 import { Route as ProductsTemplateIdRouteImport } from './routes/products/$templateId'
@@ -36,6 +39,21 @@ const CategoriesRoute = CategoriesRouteImport.update({
 const LocationsRoute = LocationsRouteImport.update({
   id: '/locations',
   path: '/locations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OpnameRoute = OpnameRouteImport.update({
+  id: '/opname',
+  path: '/opname',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReceivingRoute = ReceivingRouteImport.update({
+  id: '/receiving',
+  path: '/receiving',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TransferRoute = TransferRouteImport.update({
+  id: '/transfer',
+  path: '/transfer',
   getParentRoute: () => rootRouteImport,
 } as any)
 const UomRoute = UomRouteImport.update({
@@ -64,6 +82,9 @@ export interface FileRoutesByFullPath {
   '/attributes': typeof AttributesRoute
   '/categories': typeof CategoriesRoute
   '/locations': typeof LocationsRoute
+  '/opname': typeof OpnameRoute
+  '/receiving': typeof ReceivingRoute
+  '/transfer': typeof TransferRoute
   '/uom': typeof UomRoute
   '/products/$templateId': typeof ProductsTemplateIdRoute
   '/products/new': typeof ProductsNewRoute
@@ -74,6 +95,9 @@ export interface FileRoutesByTo {
   '/attributes': typeof AttributesRoute
   '/categories': typeof CategoriesRoute
   '/locations': typeof LocationsRoute
+  '/opname': typeof OpnameRoute
+  '/receiving': typeof ReceivingRoute
+  '/transfer': typeof TransferRoute
   '/uom': typeof UomRoute
   '/products/$templateId': typeof ProductsTemplateIdRoute
   '/products/new': typeof ProductsNewRoute
@@ -85,6 +109,9 @@ export interface FileRoutesById {
   '/attributes': typeof AttributesRoute
   '/categories': typeof CategoriesRoute
   '/locations': typeof LocationsRoute
+  '/opname': typeof OpnameRoute
+  '/receiving': typeof ReceivingRoute
+  '/transfer': typeof TransferRoute
   '/uom': typeof UomRoute
   '/products/$templateId': typeof ProductsTemplateIdRoute
   '/products/new': typeof ProductsNewRoute
@@ -97,6 +124,9 @@ export interface FileRouteTypes {
     | '/attributes'
     | '/categories'
     | '/locations'
+    | '/opname'
+    | '/receiving'
+    | '/transfer'
     | '/uom'
     | '/products/$templateId'
     | '/products/new'
@@ -107,6 +137,9 @@ export interface FileRouteTypes {
     | '/attributes'
     | '/categories'
     | '/locations'
+    | '/opname'
+    | '/receiving'
+    | '/transfer'
     | '/uom'
     | '/products/$templateId'
     | '/products/new'
@@ -117,6 +150,9 @@ export interface FileRouteTypes {
     | '/attributes'
     | '/categories'
     | '/locations'
+    | '/opname'
+    | '/receiving'
+    | '/transfer'
     | '/uom'
     | '/products/$templateId'
     | '/products/new'
@@ -128,6 +164,9 @@ export interface RootRouteChildren {
   AttributesRoute: typeof AttributesRoute
   CategoriesRoute: typeof CategoriesRoute
   LocationsRoute: typeof LocationsRoute
+  OpnameRoute: typeof OpnameRoute
+  ReceivingRoute: typeof ReceivingRoute
+  TransferRoute: typeof TransferRoute
   UomRoute: typeof UomRoute
   ProductsTemplateIdRoute: typeof ProductsTemplateIdRoute
   ProductsNewRoute: typeof ProductsNewRoute
@@ -162,6 +201,27 @@ declare module '@tanstack/react-router' {
       path: '/locations'
       fullPath: '/locations'
       preLoaderRoute: typeof LocationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/opname': {
+      id: '/opname'
+      path: '/opname'
+      fullPath: '/opname'
+      preLoaderRoute: typeof OpnameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/receiving': {
+      id: '/receiving'
+      path: '/receiving'
+      fullPath: '/receiving'
+      preLoaderRoute: typeof ReceivingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/transfer': {
+      id: '/transfer'
+      path: '/transfer'
+      fullPath: '/transfer'
+      preLoaderRoute: typeof TransferRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/uom': {
@@ -200,6 +260,9 @@ const rootRouteChildren: RootRouteChildren = {
   AttributesRoute: AttributesRoute,
   CategoriesRoute: CategoriesRoute,
   LocationsRoute: LocationsRoute,
+  OpnameRoute: OpnameRoute,
+  ReceivingRoute: ReceivingRoute,
+  TransferRoute: TransferRoute,
   UomRoute: UomRoute,
   ProductsTemplateIdRoute: ProductsTemplateIdRoute,
   ProductsNewRoute: ProductsNewRoute,

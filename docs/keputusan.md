@@ -163,3 +163,51 @@ membaca kode.
   kasir/produksi (poin 5 menyebut contoh: tutup sesi, konfirmasi MO,
   terima barang) — bukan CRUD katalog. Kalau nanti perlu, gampang
   dibungkus jadi RPC.
+
+## M4 — Penerimaan, transfer, opname (2026-08-04)
+
+- **Empat fungsi RPC Postgres baru** (`fn_receive_goods`,
+  `fn_transfer_send`, `fn_transfer_receive`, `fn_stock_opname`) —
+  ini justru operasi yang CLAUDE.md bagian 2 poin 5 sebut eksplisit
+  butuh satu transaksi ("terima barang" jadi salah satu contoh).
+  Server function TanStack Start cuma pemanggil tipis; semua logika
+  (termasuk hitung selisih opname) ada di Postgres, bukan di
+  frontend — sesuai poin 4.
+- **Tabel `stock_picking` baru**, mengelompokkan stock_move yang
+  terkait jadi satu "dokumen" (mis. transfer = 1 picking, 2 move:
+  kirim + terima). Kolom `stock_move.picking_id` sebenarnya sudah
+  disiapkan sejak M1 khusus untuk ini.
+- **Transfer WAJIB dua langkah** ditegakkan di level fungsi:
+  `fn_transfer_send` selalu lewat lokasi transit dulu (picking
+  berstatus `waiting`), `fn_transfer_receive` menolak kalau picking
+  belum `waiting` atau sudah `done` — dicoba langsung dan terbukti
+  ditolak.
+- **"Barang dalam perjalanan"** bukan tabel terpisah — cukup query
+  `stock_picking` tipe `internal_transfer` berstatus `waiting`. Saldo
+  di lokasi transit (dari `stock_quant`) itu sendiri sudah otomatis
+  jadi bukti barang belum hilang, sesuai cara kerja buku besar
+  double-entry dari M1/M2.
+- **`stock_opname` pakai lokasi virtual `inventory_loss` yang sama**
+  dari M1 untuk DUA arah (selisih kurang maupun lebih) — bukan bikin
+  lokasi baru — karena namanya sudah generik ("Inventory adjustment"),
+  cocok untuk keduanya.
+- **`noUncheckedIndexedAccess: true` ditambahkan ke tsconfig.json.**
+  Tanpa ini, TypeScript menganggap `array[i]` selalu ada isinya
+  (tidak `undefined`) — linter jadi salah mengira sebagian
+  optional-chaining kita "tidak perlu", padahal itu jaring pengaman
+  asli untuk array yang bisa kosong. Diaktifkan sekali untuk seluruh
+  proyek, bukan ditambal per baris.
+- **Tes otomatis (`tests/stock-operations.test.ts`) memakai data
+  real, lalu dipulihkan lewat operasi BALIK** (kirim ulang / opname
+  ulang ke angka semula) — bukan dihapus. `stock_move_line` memang
+  tidak boleh dihapus/diubah (hukum #1 CLAUDE.md), jadi ini satu-
+  satunya cara membersihkan diri yang konsisten dengan aturan sistem
+  sendiri. Referensi diberi awalan `TEST/M4-...` supaya gampang
+  dikenali di masa depan.
+- **Verifikasi manual di browser sekali sempat menabrak keterbatasan
+  alat klik saya sendiri** (koordinat/`ref` dari `read_page` bisa
+  basi kalau layout halaman sudah berubah sejak dibaca) — bukan bug
+  di aplikasi. Solusinya: screenshot ulang sebelum klik penting, atau
+  `scroll_to` + klik lewat `ref` segar. Transfer uji coba lewat UI
+  (5 unit JCH-BK, 00GBJ→15BGR) berhasil dan langsung dipulihkan lagi
+  lewat transfer balik supaya saldo akhir tetap sama seperti akhir M2.
