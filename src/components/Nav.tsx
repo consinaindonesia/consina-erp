@@ -11,6 +11,8 @@ const links = [
   { to: '/transfer', label: 'Transfer' },
   { to: '/opname', label: 'Opname' },
   { to: '/pos', label: 'Kasir' },
+  { to: '/production', label: 'Produksi' },
+  { to: '/work-centers', label: 'Work Center' },
 ] as const
 
 export function Nav() {

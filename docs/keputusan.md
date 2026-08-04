@@ -276,3 +276,86 @@ membaca kode.
   5 struk uji manual lewat UI (`POS/...`, JCH-BK/JCH-NV, harga benar,
   seimbang) dibiarkan sebagai `posted` — datanya valid, cuma memang
   transaksi demo, bukan dihapus atau di-cancel.
+
+## M6 — Produksi (2026-08-04)
+
+- **BOM dapat "routing"**: tabel baru `bom_operation` (bom_id,
+  work_center_id, sequence, name) mendefinisikan urutan operasi
+  (Potong → Jahit → QC → Kemas) untuk satu resep. Saat Manufacturing
+  Order (MO) dibuat lewat `fn_create_manufacturing_order`, sistem
+  otomatis mengcopy routing itu jadi baris `work_order` (satu per
+  operasi, per MO) — jadi tiap MO punya checklist sendiri yang bisa
+  ditandai selesai satu-satu oleh operator, sesuai urutan.
+- **`manufacturing_order` dapat kolom baru `warehouse_id`**: sejak M1
+  tabel ini belum tahu di gudang mana bahan diambil / barang jadi
+  disimpan. Kolom dibuat NULLABLE (bukan NOT NULL) supaya baris lama
+  (`M2/PRODUKSI-01`, dari demo gerbang-kebenaran M2 yang ditulis
+  langsung lewat SQL, bukan lewat RPC ini) tidak perlu dihapus/diubah
+  paksa — cukup dibackfill ke `00GBJ` (Gudang Pusat), gudang yang sama
+  dengan demo M2 itu.
+- **`fn_complete_manufacturing_order` menolak selesai kalau ada
+  work_order yang belum `done`**: mencegah barang jadi "muncul dari
+  udara" sebelum semua tahap produksi benar-benar dikerjakan. Juga
+  mengecek ketersediaan bahan (qty resep × qty rencana vs stok di
+  lokasi internal gudang tsb) SEBELUM menyentuh stok apa pun — supaya
+  tidak melanggar hukum #2 (stok fisik tidak boleh minus) di
+  tengah-tengah transaksi.
+- **Penyerapan biaya pakai rata-rata tertimbang (weighted average),
+  bukan FIFO/LIFO**: `stock_valuation_layer` (tabel yang memang sudah
+  disiapkan kosong sejak M1, untuk keperluan ini) mencatat satu baris
+  per produksi (qty, unit_cost, value). `product_template.cost_price`
+  lalu diperbarui dengan rumus
+  `(qty_lama × cost_lama + qty_produksi × unit_cost_baru) / (qty_lama + qty_produksi)`.
+  `qty_lama` dihitung dari SEMUA lokasi internal (semua gudang/toko),
+  bukan cuma gudang tempat produksi — karena `cost_price` disimpan di
+  level `product_template` (dipakai bersama semua varian & lokasi),
+  bukan per lokasi. Ini konsisten dengan `sale_price` yang juga di
+  level template sejak M1 — bukan desain baru M6.
+- **Kenapa biaya bahan pakai `product_template.cost_price` bahan baku
+  saat itu (bukan FIFO historis)**: sederhana dan cukup untuk skala
+  bisnis ini; kalau nanti harga bahan baku sering berubah dan perlu
+  akurasi FIFO/lot-tracking, itu perbaikan terpisah, bukan bagian M6.
+- **Test (`tests/production.test.ts`) membuktikan kriteria M6 persis
+  seperti yang diminta**: buat MO 10 unit, cek bahan berkurang PERSIS
+  sesuai rasio resep (12 kain, 10 resleting, 8 webbing untuk 10 unit
+  jaket), cek barang jadi bertambah 10, DAN bandingkan `cost_price`
+  sebelum-sesudah pakai rumus yang sama seperti di atas (dihitung
+  independen di tes, bukan cuma "pasti berubah"). Juga membuktikan MO
+  tidak bisa diselesaikan kalau masih ada operasi pending, dan tidak
+  bisa diselesaikan dua kali.
+- **BUG NYATA ditemukan saat debugging tes sendiri, bukan di sistem**:
+  draf pertama tes menghitung `cost_price` yang diharapkan pakai qty
+  barang jadi HANYA di gudang tempat produksi (00GBJ), padahal RPC
+  menjumlah dari SEMUA lokasi internal (JCH-BK ternyata juga ada
+  stoknya di toko Bogor). Setelah diperbaiki, tes cocok persis dengan
+  hasil RPC. Pelajaran ini dicatat karena kesalahan yang sama gampang
+  terulang kalau nanti ada modul lain yang menghitung "stok yang
+  dipegang" — harus eksplisit: satu lokasi atau semua lokasi internal?
+- **BUG NYATA kedua, kali ini di proses verifikasi manual (bukan di
+  kode produk)**: saat mengulang tes berkali-kali sambil memperbaiki
+  bug di atas, satu percobaan gagal SEBELUM mencapai kode
+  pembersihan-nya sendiri (pembersihan pakai pola "operasi balik",
+  sesuai hukum #6 — stock_move_line permanen, tidak boleh
+  diupdate/dihapus). Akibatnya ada 12 kain / 10 resleting / 8 webbing
+  yang terpakai nyata dan tidak pernah dikembalikan, plus
+  `cost_price` yang ikut berubah — baru ketahuan saat verifikasi UI
+  manual menunjukkan `cost_price` sudah tidak 0 padahal belum ada
+  produksi "resmi". Dan saat memperbaiki INI PUN sempat salah arah
+  (bahan yang harusnya "dikembalikan" ke gudang malah dikirim balik
+  ke supplier, hampir bikin stok minus di 00GBJ) — diperbaiki
+  lagi dengan mengecek `sql/cek-kesehatan.sql` ulang setelah setiap
+  koreksi manual, sampai semua 9 baris kembali "OK". Pelajaran:
+  koreksi data manual di database live HARUS diverifikasi lagi dengan
+  cek-kesehatan setelahnya, jangan percaya perhitungan mental sendiri
+  begitu saja — arah pergerakan stok (masuk vs keluar) gampang
+  tertukar saat buru-buru.
+- **UI `/production`**: form buat MO menampilkan pratinjau
+  ketersediaan bahan (butuh vs tersedia per komponen resep) sebelum
+  disubmit, dan tombol "Buat MO" dinonaktifkan kalau ada bahan yang
+  kurang — supaya operator tidak coba-coba bikin MO yang pasti gagal.
+  Checklist operasi menampilkan tombol "Tandai selesai" hanya untuk
+  operasi PENDING BERIKUTNYA sesuai urutan (client-side saja; RPC
+  `fn_complete_work_order` sendiri tidak memaksa urutan) — ini pilihan
+  UX supaya alur terasa natural, bukan aturan bisnis yang keras.
+- **Halaman `/work-centers`**: CRUD sederhana untuk kelola work center
+  (kode + nama), pola yang sama seperti `/categories`.

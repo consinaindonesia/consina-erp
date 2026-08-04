@@ -86,6 +86,45 @@ export type Database = {
           },
         ]
       }
+      bom_operation: {
+        Row: {
+          bom_id: string
+          id: string
+          name: string
+          sequence: number
+          work_center_id: string
+        }
+        Insert: {
+          bom_id: string
+          id?: string
+          name: string
+          sequence: number
+          work_center_id: string
+        }
+        Update: {
+          bom_id?: string
+          id?: string
+          name?: string
+          sequence?: number
+          work_center_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bom_operation_bom_id_fkey"
+            columns: ["bom_id"]
+            isOneToOne: false
+            referencedRelation: "bom"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bom_operation_work_center_id_fkey"
+            columns: ["work_center_id"]
+            isOneToOne: false
+            referencedRelation: "work_center"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       location: {
         Row: {
           active: boolean
@@ -135,6 +174,7 @@ export type Database = {
           reference: string
           state: string
           variant_id: string
+          warehouse_id: string | null
         }
         Insert: {
           bom_id: string
@@ -146,6 +186,7 @@ export type Database = {
           reference: string
           state?: string
           variant_id: string
+          warehouse_id?: string | null
         }
         Update: {
           bom_id?: string
@@ -157,6 +198,7 @@ export type Database = {
           reference?: string
           state?: string
           variant_id?: string
+          warehouse_id?: string | null
         }
         Relationships: [
           {
@@ -171,6 +213,13 @@ export type Database = {
             columns: ["variant_id"]
             isOneToOne: false
             referencedRelation: "product_variant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "manufacturing_order_warehouse_id_fkey"
+            columns: ["warehouse_id"]
+            isOneToOne: false
+            referencedRelation: "warehouse"
             referencedColumns: ["id"]
           },
         ]
@@ -847,6 +896,85 @@ export type Database = {
         }
         Relationships: []
       }
+      work_center: {
+        Row: {
+          active: boolean
+          code: string
+          id: string
+          name: string
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          id?: string
+          name: string
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      work_order: {
+        Row: {
+          bom_operation_id: string
+          done_at: string | null
+          id: string
+          manufacturing_order_id: string
+          name: string
+          sequence: number
+          started_at: string | null
+          state: string
+          work_center_id: string
+        }
+        Insert: {
+          bom_operation_id: string
+          done_at?: string | null
+          id?: string
+          manufacturing_order_id: string
+          name: string
+          sequence: number
+          started_at?: string | null
+          state?: string
+          work_center_id: string
+        }
+        Update: {
+          bom_operation_id?: string
+          done_at?: string | null
+          id?: string
+          manufacturing_order_id?: string
+          name?: string
+          sequence?: number
+          started_at?: string | null
+          state?: string
+          work_center_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "work_order_bom_operation_id_fkey"
+            columns: ["bom_operation_id"]
+            isOneToOne: false
+            referencedRelation: "bom_operation"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "work_order_manufacturing_order_id_fkey"
+            columns: ["manufacturing_order_id"]
+            isOneToOne: false
+            referencedRelation: "manufacturing_order"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "work_order_work_center_id_fkey"
+            columns: ["work_center_id"]
+            isOneToOne: false
+            referencedRelation: "work_center"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -856,13 +984,21 @@ export type Database = {
         Args: { p_counted_cash: number; p_session_id: string }
         Returns: undefined
       }
-      fn_sync_pos_order: {
+      fn_complete_manufacturing_order: {
+        Args: { p_mo_id: string; p_qty_produced: number }
+        Returns: undefined
+      }
+      fn_complete_work_order: {
+        Args: { p_work_order_id: string }
+        Returns: undefined
+      }
+      fn_create_manufacturing_order: {
         Args: {
-          p_client_uuid: string
-          p_lines: Json
-          p_order_no: string
-          p_payments: Json
-          p_session_id: string
+          p_bom_id: string
+          p_qty_planned: number
+          p_reference: string
+          p_variant_id: string
+          p_warehouse_id: string
         }
         Returns: string
       }
@@ -877,6 +1013,16 @@ export type Database = {
       }
       fn_stock_opname: {
         Args: { p_counts: Json; p_location_id: string; p_reference: string }
+        Returns: string
+      }
+      fn_sync_pos_order: {
+        Args: {
+          p_client_uuid: string
+          p_lines: Json
+          p_order_no: string
+          p_payments: Json
+          p_session_id: string
+        }
         Returns: string
       }
       fn_transfer_receive: {

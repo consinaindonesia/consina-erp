@@ -15,9 +15,11 @@ import { Route as CategoriesRouteImport } from './routes/categories'
 import { Route as LocationsRouteImport } from './routes/locations'
 import { Route as OpnameRouteImport } from './routes/opname'
 import { Route as PosRouteImport } from './routes/pos'
+import { Route as ProductionRouteImport } from './routes/production'
 import { Route as ReceivingRouteImport } from './routes/receiving'
 import { Route as TransferRouteImport } from './routes/transfer'
 import { Route as UomRouteImport } from './routes/uom'
+import { Route as WorkCentersRouteImport } from './routes/work-centers'
 import { Route as ProductsIndexRouteImport } from './routes/products/index'
 import { Route as ProductsTemplateIdRouteImport } from './routes/products/$templateId'
 import { Route as ProductsNewRouteImport } from './routes/products/new'
@@ -52,6 +54,11 @@ const PosRoute = PosRouteImport.update({
   path: '/pos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProductionRoute = ProductionRouteImport.update({
+  id: '/production',
+  path: '/production',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ReceivingRoute = ReceivingRouteImport.update({
   id: '/receiving',
   path: '/receiving',
@@ -65,6 +72,11 @@ const TransferRoute = TransferRouteImport.update({
 const UomRoute = UomRouteImport.update({
   id: '/uom',
   path: '/uom',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WorkCentersRoute = WorkCentersRouteImport.update({
+  id: '/work-centers',
+  path: '/work-centers',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProductsIndexRoute = ProductsIndexRouteImport.update({
@@ -90,9 +102,11 @@ export interface FileRoutesByFullPath {
   '/locations': typeof LocationsRoute
   '/opname': typeof OpnameRoute
   '/pos': typeof PosRoute
+  '/production': typeof ProductionRoute
   '/receiving': typeof ReceivingRoute
   '/transfer': typeof TransferRoute
   '/uom': typeof UomRoute
+  '/work-centers': typeof WorkCentersRoute
   '/products/$templateId': typeof ProductsTemplateIdRoute
   '/products/new': typeof ProductsNewRoute
   '/products/': typeof ProductsIndexRoute
@@ -104,9 +118,11 @@ export interface FileRoutesByTo {
   '/locations': typeof LocationsRoute
   '/opname': typeof OpnameRoute
   '/pos': typeof PosRoute
+  '/production': typeof ProductionRoute
   '/receiving': typeof ReceivingRoute
   '/transfer': typeof TransferRoute
   '/uom': typeof UomRoute
+  '/work-centers': typeof WorkCentersRoute
   '/products/$templateId': typeof ProductsTemplateIdRoute
   '/products/new': typeof ProductsNewRoute
   '/products': typeof ProductsIndexRoute
@@ -119,9 +135,11 @@ export interface FileRoutesById {
   '/locations': typeof LocationsRoute
   '/opname': typeof OpnameRoute
   '/pos': typeof PosRoute
+  '/production': typeof ProductionRoute
   '/receiving': typeof ReceivingRoute
   '/transfer': typeof TransferRoute
   '/uom': typeof UomRoute
+  '/work-centers': typeof WorkCentersRoute
   '/products/$templateId': typeof ProductsTemplateIdRoute
   '/products/new': typeof ProductsNewRoute
   '/products/': typeof ProductsIndexRoute
@@ -135,9 +153,11 @@ export interface FileRouteTypes {
     | '/locations'
     | '/opname'
     | '/pos'
+    | '/production'
     | '/receiving'
     | '/transfer'
     | '/uom'
+    | '/work-centers'
     | '/products/$templateId'
     | '/products/new'
     | '/products/'
@@ -149,9 +169,11 @@ export interface FileRouteTypes {
     | '/locations'
     | '/opname'
     | '/pos'
+    | '/production'
     | '/receiving'
     | '/transfer'
     | '/uom'
+    | '/work-centers'
     | '/products/$templateId'
     | '/products/new'
     | '/products'
@@ -163,9 +185,11 @@ export interface FileRouteTypes {
     | '/locations'
     | '/opname'
     | '/pos'
+    | '/production'
     | '/receiving'
     | '/transfer'
     | '/uom'
+    | '/work-centers'
     | '/products/$templateId'
     | '/products/new'
     | '/products/'
@@ -178,9 +202,11 @@ export interface RootRouteChildren {
   LocationsRoute: typeof LocationsRoute
   OpnameRoute: typeof OpnameRoute
   PosRoute: typeof PosRoute
+  ProductionRoute: typeof ProductionRoute
   ReceivingRoute: typeof ReceivingRoute
   TransferRoute: typeof TransferRoute
   UomRoute: typeof UomRoute
+  WorkCentersRoute: typeof WorkCentersRoute
   ProductsTemplateIdRoute: typeof ProductsTemplateIdRoute
   ProductsNewRoute: typeof ProductsNewRoute
   ProductsIndexRoute: typeof ProductsIndexRoute
@@ -230,6 +256,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/production': {
+      id: '/production'
+      path: '/production'
+      fullPath: '/production'
+      preLoaderRoute: typeof ProductionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/receiving': {
       id: '/receiving'
       path: '/receiving'
@@ -249,6 +282,13 @@ declare module '@tanstack/react-router' {
       path: '/uom'
       fullPath: '/uom'
       preLoaderRoute: typeof UomRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/work-centers': {
+      id: '/work-centers'
+      path: '/work-centers'
+      fullPath: '/work-centers'
+      preLoaderRoute: typeof WorkCentersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/products/': {
@@ -282,9 +322,11 @@ const rootRouteChildren: RootRouteChildren = {
   LocationsRoute: LocationsRoute,
   OpnameRoute: OpnameRoute,
   PosRoute: PosRoute,
+  ProductionRoute: ProductionRoute,
   ReceivingRoute: ReceivingRoute,
   TransferRoute: TransferRoute,
   UomRoute: UomRoute,
+  WorkCentersRoute: WorkCentersRoute,
   ProductsTemplateIdRoute: ProductsTemplateIdRoute,
   ProductsNewRoute: ProductsNewRoute,
   ProductsIndexRoute: ProductsIndexRoute,
