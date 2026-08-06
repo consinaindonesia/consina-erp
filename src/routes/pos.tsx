@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { Button, Card, Input, Label, PageShell } from '#/components/ui'
 import { listWarehouses } from '#/server/locations'
 import {
   closePosSession,
@@ -25,6 +26,7 @@ import type {
   PendingOrder,
   PendingPayment,
 } from '#/lib/pos-db'
+import { color, font } from '#/lib/theme'
 
 export const Route = createFileRoute('/pos')({
   component: Pos,
@@ -141,9 +143,9 @@ function Pos() {
 
   if (localSession === 'loading') {
     return (
-      <main style={{ fontFamily: 'system-ui, sans-serif', padding: 24 }}>
-        <p>Memuat…</p>
-      </main>
+      <PageShell>
+        <div style={{ padding: 24, font: `400 13.5px/1 ${font.sans}`, color: color.textMuted }}>Memuat…</div>
+      </PageShell>
     )
   }
 
@@ -234,72 +236,40 @@ function OpenSessionForm({
   }
 
   return (
-    <main
-      style={{
-        fontFamily: 'system-ui, sans-serif',
-        padding: 24,
-        maxWidth: 480,
-      }}
-    >
-      <h1>Buka Sesi Kasir</h1>
-      <p style={{ color: '#5A6661', fontSize: 13.5 }}>
-        Butuh koneksi internet sekali di awal. Setelah sesi terbuka, kasir bisa
-        jalan tanpa internet.
-      </p>
-      <form
-        onSubmit={onSubmit}
-        style={{ display: 'flex', flexDirection: 'column', gap: 14 }}
-      >
-        <label>
-          Toko
-          <select
-            value={warehouseId}
-            onChange={(e) => setWarehouseId(e.target.value)}
-            style={{
-              display: 'block',
-              width: '100%',
-              padding: 8,
-              marginTop: 4,
-            }}
-          >
-            {stores.map((w) => (
-              <option key={w.id} value={w.id}>
-                {w.code} — {w.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Kas awal (Rp)
-          <input
-            type="number"
-            min="0"
-            value={openingCash}
-            onChange={(e) => setOpeningCash(e.target.value)}
-            style={{
-              display: 'block',
-              width: '100%',
-              padding: 8,
-              marginTop: 4,
-            }}
-          />
-        </label>
-        <button
-          type="submit"
-          disabled={saving}
-          style={{
-            padding: '10px 18px',
-            background: '#1F6F4A',
-            color: '#fff',
-            border: 0,
-            borderRadius: 6,
-          }}
-        >
-          {saving ? 'Membuka…' : 'Buka Sesi'}
-        </button>
-        {error && <p style={{ color: '#C8362A' }}>{error}</p>}
-      </form>
-    </main>
+    <PageShell>
+      <div style={{ padding: 24, maxWidth: 420 }}>
+        <h1 style={{ font: `600 20px/1.2 ${font.sans}`, margin: '0 0 6px' }}>Buka Sesi Kasir</h1>
+        <p style={{ font: `400 13px/1.5 ${font.sans}`, color: color.textSubtle, margin: '0 0 18px' }}>
+          Butuh koneksi internet sekali di awal. Setelah sesi terbuka, kasir bisa jalan tanpa internet.
+        </p>
+        <Card>
+          <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14, padding: 18 }}>
+            <Label>
+              Toko
+              <select
+                value={warehouseId}
+                onChange={(e) => setWarehouseId(e.target.value)}
+                style={{ border: `1px solid ${color.borderStrong}`, borderRadius: 7, padding: '9px 12px', font: `400 14px/1 ${font.sans}` }}
+              >
+                {stores.map((w) => (
+                  <option key={w.id} value={w.id}>
+                    {w.code} — {w.name}
+                  </option>
+                ))}
+              </select>
+            </Label>
+            <Label>
+              Kas awal (Rp)
+              <Input type="number" min="0" value={openingCash} onChange={(e) => setOpeningCash(e.target.value)} />
+            </Label>
+            <Button type="submit" variant="accent" disabled={saving} style={{ padding: 14, fontSize: 15 }}>
+              {saving ? 'Membuka…' : 'Buka Sesi'}
+            </Button>
+            {error && <p style={{ color: color.brandRed, font: `500 13px/1.4 ${font.sans}` }}>{error}</p>}
+          </form>
+        </Card>
+      </div>
+    </PageShell>
   )
 }
 
@@ -340,9 +310,6 @@ function PosScreen({
   const [cart, setCart] = useState<Array<CartItem>>([])
   const [showPay, setShowPay] = useState(false)
   const [showClose, setShowClose] = useState(false)
-  const isOnlineRef = useRef(
-    typeof navigator !== 'undefined' ? navigator.onLine : true,
-  )
 
   const filtered = query.trim()
     ? products.filter(
@@ -410,224 +377,137 @@ function PosScreen({
   }
 
   return (
-    <main
-      style={{
-        fontFamily: 'system-ui, sans-serif',
-        padding: 24,
-        maxWidth: 1100,
-      }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'baseline',
-          flexWrap: 'wrap',
-          gap: 8,
-        }}
-      >
-        <h1>Kasir · {session.warehouse_code}</h1>
-        <div
-          style={{
-            display: 'flex',
-            gap: 10,
-            alignItems: 'center',
-            fontSize: 12.5,
-          }}
-        >
-          <span style={{ color: pendingCount > 0 ? '#8a5c12' : '#1F6F4A' }}>
-            {pendingCount > 0
-              ? `${pendingCount} struk belum tersinkron`
-              : 'Semua struk tersinkron'}
-          </span>
+    <div style={{ height: 'calc(100vh - 46px)', display: 'flex', flexDirection: 'column', background: color.panelBg }}>
+      <div style={{ height: 56, flex: 'none', background: color.headerBg, display: 'flex', alignItems: 'center', padding: '0 18px', gap: 14, color: '#fff' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+          <div style={{ width: 26, height: 26, borderRadius: 7, background: color.brandRed, display: 'flex', alignItems: 'center', justifyContent: 'center', font: `700 12px/1 ${font.sans}` }}>C</div>
+          <span style={{ font: `600 15px/1 ${font.sans}` }}>Kasir · {session.warehouse_code}</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 10px', borderRadius: 20, background: 'rgba(255,255,255,.12)', font: `500 11.5px/1 ${font.mono}` }}>
+          <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#57D191' }} />
+          {pendingCount > 0 ? `${pendingCount} struk belum tersinkron` : 'Semua struk tersinkron'}
+        </div>
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 12 }}>
+          {syncMessage && <span style={{ font: `400 12px/1 ${font.sans}`, color: 'rgba(255,255,255,.7)' }}>{syncMessage}</span>}
           <button
             type="button"
             onClick={onSync}
-            style={{ padding: '6px 10px', fontSize: 12.5 }}
+            style={{ border: '1px solid rgba(255,255,255,.32)', background: 'transparent', color: '#fff', borderRadius: 6, padding: '7px 12px', font: `500 12px/1 ${font.sans}`, cursor: 'pointer' }}
           >
             Sinkron sekarang
           </button>
           <button
             type="button"
             onClick={() => setShowClose(true)}
-            style={{
-              padding: '6px 10px',
-              fontSize: 12.5,
-              background: '#16211C',
-              color: '#fff',
-              border: 0,
-              borderRadius: 6,
-            }}
+            style={{ border: '1px solid rgba(255,255,255,.32)', background: 'transparent', color: '#fff', borderRadius: 6, padding: '7px 13px', font: `500 12.5px/1 ${font.sans}`, cursor: 'pointer' }}
           >
             Tutup Sesi
           </button>
         </div>
       </div>
-      {syncMessage && (
-        <p style={{ color: '#1F6F4A', fontSize: 12.5 }}>{syncMessage}</p>
-      )}
 
-      <div
-        style={{ display: 'flex', gap: 20, marginTop: 16, flexWrap: 'wrap' }}
-      >
-        <div style={{ flex: '1 1 500px', minWidth: 300 }}>
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Cari nama produk, SKU, atau barcode…"
-            style={{
-              width: '100%',
-              padding: 10,
-              boxSizing: 'border-box',
-              border: '1px solid #D6DDDA',
-              borderRadius: 8,
-            }}
-          />
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 6,
-              marginTop: 12,
-              maxHeight: 480,
-              overflowY: 'auto',
-            }}
-          >
+      <div style={{ flex: 1, display: 'flex', minHeight: 0 }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, padding: '16px 16px 0' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#fff', border: `1px solid ${color.borderStrong}`, borderRadius: 9, padding: '0 14px', height: 52, flex: 'none', boxShadow: '0 1px 2px rgba(0,0,0,.04)' }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#84918B" strokeWidth="2.2" strokeLinecap="round">
+              <circle cx="11" cy="11" r="7" />
+              <path d="m20 20-3.6-3.6" />
+            </svg>
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Cari nama produk, SKU, atau barcode…"
+              style={{ flex: 1, border: 0, outline: 'none', font: `400 15.5px/1 ${font.sans}`, color: color.text, background: 'transparent' }}
+            />
+          </div>
+
+          <div style={{ flex: 1, overflowY: 'auto', padding: '12px 0 16px', display: 'flex', flexDirection: 'column', gap: 7 }}>
             {filtered.map((p) => (
               <button
                 key={p.id}
                 type="button"
                 onClick={() => addToCart(p)}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  textAlign: 'left',
-                  padding: '10px 12px',
-                  border: '1px solid #E0E5E3',
-                  borderRadius: 8,
-                  background: '#fff',
-                  cursor: 'pointer',
-                }}
+                style={{ display: 'grid', gridTemplateColumns: '44px 1fr auto', alignItems: 'center', gap: 14, textAlign: 'left', background: '#fff', border: `1px solid ${color.border}`, borderRadius: 9, padding: '11px 14px', cursor: 'pointer' }}
               >
-                <span>
-                  {p.name}{' '}
-                  <span style={{ color: '#84918B', fontSize: 12 }}>
-                    ({p.sku})
-                  </span>
-                </span>
-                <strong>{formatRupiah(p.sale_price)}</strong>
+                <div style={{ width: 44, height: 44, borderRadius: 7, background: color.brandDark, border: '1px solid rgba(0,0,0,.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', font: `600 12px/1 ${font.mono}`, color: '#fff' }}>
+                  {p.sku.slice(0, 2).toUpperCase()}
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 3, minWidth: 0 }}>
+                  <span style={{ font: `500 14.5px/1.2 ${font.sans}`, color: color.text }}>{p.name}</span>
+                  <span style={{ font: `400 12px/1 ${font.mono}`, color: color.textMuted }}>{p.sku}</span>
+                </div>
+                <span style={{ font: `600 14.5px/1 ${font.mono}`, color: color.text, minWidth: 104, textAlign: 'right' }}>{formatRupiah(p.sale_price)}</span>
               </button>
             ))}
             {filtered.length === 0 && (
-              <p style={{ color: '#84918B' }}>Tidak ada produk cocok.</p>
+              <div style={{ padding: 34, textAlign: 'center', font: `400 13.5px/1.5 ${font.sans}`, color: color.textMuted, background: '#fff', border: `1px dashed ${color.borderStrong}`, borderRadius: 9 }}>
+                Tidak ada produk cocok.
+              </div>
             )}
           </div>
         </div>
 
-        <div
-          style={{
-            flex: '1 1 320px',
-            minWidth: 280,
-            border: '1px solid #E0E5E3',
-            borderRadius: 8,
-            padding: 14,
-          }}
-        >
-          <strong>Struk</strong>
-          <div
-            style={{
-              marginTop: 10,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 8,
-            }}
-          >
+        <div style={{ width: 392, flex: 'none', background: '#fff', borderLeft: `1px solid ${color.borderStrong}`, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+          <div style={{ padding: '14px 16px', borderBottom: `1px solid ${color.divider}`, display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', flex: 'none' }}>
+            <span style={{ font: `600 13.5px/1 ${font.mono}`, color: color.text }}>Struk</span>
+            <span style={{ font: `400 11.5px/1 ${font.mono}`, color: color.textMuted }}>{cart.reduce((a, l) => a + l.qty, 0)} item</span>
+          </div>
+
+          <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
             {cart.length === 0 && (
-              <p style={{ color: '#A2ADA7' }}>Belum ada barang.</p>
+              <div style={{ padding: '44px 26px', textAlign: 'center', color: color.textFaint, font: `400 13.5px/1.55 ${font.sans}` }}>
+                Belum ada barang.
+                <br />
+                Cari produk di sebelah kiri lalu klik untuk menambahkan.
+              </div>
             )}
             {cart.map((l) => (
-              <div
-                key={l.product.id}
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr auto',
-                  gap: 6,
-                }}
-              >
-                <div>
-                  <div>{l.product.name}</div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 6,
-                      marginTop: 2,
-                    }}
-                  >
+              <div key={l.product.id} style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 8, padding: '12px 16px', borderBottom: `1px solid ${color.dividerSoft}` }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
+                  <span style={{ font: `500 13.5px/1.25 ${font.sans}` }}>{l.product.name}</span>
+                  <span style={{ font: `400 11.5px/1 ${font.mono}`, color: color.textMuted }}>{l.product.sku} · {formatRupiah(l.product.sale_price)}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 3 }}>
                     <button
                       type="button"
                       onClick={() => updateQty(l.product.id, -1)}
-                      style={{ width: 24, height: 24 }}
+                      style={{ width: 26, height: 26, border: `1px solid ${color.borderStrong}`, background: '#fff', borderRadius: 6, font: `600 15px/1 ${font.sans}`, color: color.textSubtle, cursor: 'pointer' }}
                     >
                       −
                     </button>
-                    <span>{l.qty}</span>
+                    <span style={{ font: `600 13.5px/1 ${font.mono}`, minWidth: 20, textAlign: 'center' }}>{l.qty}</span>
                     <button
                       type="button"
                       onClick={() => updateQty(l.product.id, 1)}
-                      style={{ width: 24, height: 24 }}
+                      style={{ width: 26, height: 26, border: `1px solid ${color.borderStrong}`, background: '#fff', borderRadius: 6, font: `600 15px/1 ${font.sans}`, color: color.textSubtle, cursor: 'pointer' }}
                     >
                       +
                     </button>
                     <button
                       type="button"
                       onClick={() => removeFromCart(l.product.id)}
-                      style={{
-                        color: '#C8362A',
-                        border: 0,
-                        background: 'transparent',
-                      }}
+                      style={{ marginLeft: 2, border: 0, background: 'transparent', color: color.brandRed, font: `500 11.5px/1 ${font.sans}`, cursor: 'pointer', padding: '6px 2px' }}
                     >
                       hapus
                     </button>
                   </div>
                 </div>
-                <strong>{formatRupiah(l.qty * l.product.sale_price)}</strong>
+                <span style={{ font: `600 14px/1.2 ${font.mono}`, textAlign: 'right' }}>{formatRupiah(l.qty * l.product.sale_price)}</span>
               </div>
             ))}
           </div>
-          <div
-            style={{
-              borderTop: '1px dashed #D6DDDA',
-              marginTop: 14,
-              paddingTop: 10,
-              display: 'flex',
-              justifyContent: 'space-between',
-            }}
-          >
-            <strong>Total</strong>
-            <strong>{formatRupiah(cartTotal)}</strong>
+
+          <div style={{ flex: 'none', borderTop: `1px solid ${color.divider}`, padding: '14px 16px 16px', background: color.subtleBg }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', paddingTop: 11, borderTop: `1px dashed ${color.borderStrong}` }}>
+              <span style={{ font: `600 15px/1 ${font.sans}` }}>Total</span>
+              <span style={{ font: `600 25px/1 ${font.mono}`, color: color.headerBg }}>{formatRupiah(cartTotal)}</span>
+            </div>
+            <p style={{ margin: '9px 0 12px', font: `400 10.5px/1.4 ${font.mono}`, color: color.textFaint }}>
+              Angka ini perkiraan dari harga tersimpan lokal. Nilai final dihitung ulang di server saat sinkron.
+            </p>
+            <Button variant="accent" disabled={cart.length === 0} onClick={() => setShowPay(true)} style={{ width: '100%', padding: 16, fontSize: 16, borderRadius: 9 }}>
+              Bayar
+            </Button>
           </div>
-          <p style={{ fontSize: 11, color: '#A2ADA7' }}>
-            Angka ini perkiraan dari harga tersimpan lokal. Nilai final dihitung
-            ulang di server saat sinkron.
-          </p>
-          <button
-            type="button"
-            disabled={cart.length === 0}
-            onClick={() => setShowPay(true)}
-            style={{
-              width: '100%',
-              padding: 14,
-              background: '#1F6F4A',
-              color: '#fff',
-              border: 0,
-              borderRadius: 8,
-              marginTop: 8,
-            }}
-          >
-            Bayar
-          </button>
         </div>
       </div>
 
@@ -651,7 +531,15 @@ function PosScreen({
           }}
         />
       )}
-    </main>
+    </div>
+  )
+}
+
+function ModalOverlay({ children }: { children: React.ReactNode }) {
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,18,15,.52)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 40, zIndex: 100 }}>
+      {children}
+    </div>
   )
 }
 
@@ -670,130 +558,65 @@ function PayModal({
   const change = Number(cash) - total
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'rgba(10,18,15,.5)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <div
-        style={{
-          width: 380,
-          background: '#fff',
-          borderRadius: 12,
-          padding: 22,
-        }}
-      >
-        <h2 style={{ marginTop: 0, fontSize: 16 }}>Pembayaran</h2>
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            background: '#F4F6F5',
-            padding: '12px 14px',
-            borderRadius: 8,
-          }}
-        >
-          <span>Total</span>
-          <strong>{formatRupiah(total)}</strong>
-        </div>
-        <div style={{ display: 'flex', gap: 8, marginTop: 14 }}>
-          {(['cash', 'qris', 'edc'] as const).map((m) => (
-            <button
-              key={m}
-              type="button"
-              onClick={() => setMethod(m)}
-              style={{
-                flex: 1,
-                padding: 10,
-                border:
-                  method === m ? '2px solid #1F6F4A' : '1px solid #D6DDDA',
-                borderRadius: 8,
-                background: method === m ? '#EAF6EF' : '#fff',
-              }}
-            >
-              {m === 'cash' ? 'Tunai' : m.toUpperCase()}
-            </button>
-          ))}
-        </div>
-        {method === 'cash' && (
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: 10,
-              marginTop: 14,
-            }}
-          >
-            <label>
-              Uang diterima
-              <input
-                type="number"
-                value={cash}
-                onChange={(e) => setCash(e.target.value)}
+    <ModalOverlay>
+      <div style={{ width: 420, background: '#fff', borderRadius: 14, overflow: 'hidden', boxShadow: '0 20px 50px rgba(0,0,0,.3)' }}>
+        <div style={{ padding: '18px 22px', borderBottom: `1px solid ${color.divider}`, font: `600 16px/1 ${font.sans}` }}>Pembayaran</div>
+        <div style={{ padding: 22 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '14px 16px', background: color.panelBg, borderRadius: 10 }}>
+            <span style={{ font: `500 13.5px/1 ${font.sans}`, color: color.textSubtle }}>Total</span>
+            <span style={{ font: `600 22px/1 ${font.mono}`, color: color.text }}>{formatRupiah(total)}</span>
+          </div>
+          <div style={{ display: 'flex', gap: 8, marginTop: 14 }}>
+            {(['cash', 'qris', 'edc'] as const).map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => setMethod(m)}
                 style={{
-                  display: 'block',
-                  width: '100%',
-                  padding: 8,
-                  marginTop: 4,
-                }}
-              />
-            </label>
-            <label>
-              Kembalian
-              <div
-                style={{
-                  padding: 8,
-                  marginTop: 4,
-                  background: '#F4F6F5',
-                  borderRadius: 6,
+                  flex: 1,
+                  padding: 12,
+                  border: method === m ? `1.5px solid ${color.brandGreen}` : `1.5px solid ${color.borderStrong}`,
+                  borderRadius: 10,
+                  background: method === m ? color.successBg : '#fff',
+                  color: method === m ? color.successFg : color.textSubtle,
+                  font: `600 14px/1 ${font.sans}`,
+                  cursor: 'pointer',
                 }}
               >
-                {formatRupiah(Math.max(0, change))}
-              </div>
-            </label>
+                {m === 'cash' ? 'Tunai' : m.toUpperCase()}
+              </button>
+            ))}
           </div>
-        )}
-        <div style={{ display: 'flex', gap: 10, marginTop: 18 }}>
-          <button
-            type="button"
-            onClick={onCancel}
-            style={{
-              flex: 'none',
-              padding: '12px 18px',
-              border: '1px solid #D6DDDA',
-              background: '#fff',
-              borderRadius: 8,
-            }}
-          >
-            Batal
-          </button>
-          <button
-            type="button"
-            disabled={method === 'cash' && change < 0}
-            onClick={() =>
-              onConfirm([
-                { method, amount: method === 'cash' ? Number(cash) : total },
-              ])
-            }
-            style={{
-              flex: 1,
-              padding: 12,
-              background: '#1F6F4A',
-              color: '#fff',
-              border: 0,
-              borderRadius: 8,
-            }}
-          >
-            Selesaikan &amp; Cetak Struk
-          </button>
+          {method === 'cash' && (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 14 }}>
+              <Label>
+                Uang diterima
+                <Input type="number" value={cash} onChange={(e) => setCash(e.target.value)} style={{ font: `600 17px/1 ${font.mono}` }} />
+              </Label>
+              <Label>
+                Kembalian
+                <div style={{ border: `1px solid ${color.border}`, borderRadius: 8, padding: '9px 12px', font: `600 17px/1 ${font.mono}`, background: color.panelBg }}>
+                  {formatRupiah(Math.max(0, change))}
+                </div>
+              </Label>
+            </div>
+          )}
+          <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
+            <Button variant="secondary" onClick={onCancel} style={{ padding: '13px 20px' }}>
+              Batal
+            </Button>
+            <Button
+              variant="accent"
+              disabled={method === 'cash' && change < 0}
+              onClick={() => onConfirm([{ method, amount: method === 'cash' ? Number(cash) : total }])}
+              style={{ flex: 1, padding: 13, fontSize: 15 }}
+            >
+              Selesaikan &amp; Cetak Struk
+            </Button>
+          </div>
         </div>
       </div>
-    </div>
+    </ModalOverlay>
   )
 }
 
@@ -810,47 +633,18 @@ function Receipt({
   onClose: () => void
 }) {
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'rgba(10,18,15,.5)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <div
-        style={{
-          width: 340,
-          background: '#fff',
-          borderRadius: 12,
-          padding: 22,
-        }}
-      >
-        <div style={{ textAlign: 'center', fontWeight: 600, fontSize: 17 }}>
-          Transaksi tersimpan
+    <ModalOverlay>
+      <div style={{ width: 370, background: '#fff', borderRadius: 12, padding: '26px 24px', boxShadow: '0 20px 50px rgba(0,0,0,.3)', textAlign: 'center' }}>
+        <div style={{ width: 52, height: 52, margin: '0 auto 14px', borderRadius: '50%', background: color.successBg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={color.brandGreen} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
+            <path d="m5 13 4.5 4.5L19 7" />
+          </svg>
         </div>
-        <div
-          style={{
-            textAlign: 'center',
-            color: '#84918B',
-            fontSize: 12.5,
-            marginTop: 4,
-          }}
-        >
-          {receipt.order_no}
-        </div>
+        <div style={{ font: `600 17px/1.3 ${font.sans}` }}>Transaksi tersimpan</div>
+        <div style={{ marginTop: 6, font: `400 12.5px/1.5 ${font.mono}`, color: color.textMuted }}>{receipt.order_no}</div>
         <div
           id="print-receipt"
-          style={{
-            marginTop: 16,
-            padding: 14,
-            border: '1px dashed #D6DDDA',
-            borderRadius: 8,
-            fontSize: 12.5,
-            whiteSpace: 'pre-wrap',
-          }}
+          style={{ margin: '18px 0', padding: 16, border: `1px dashed ${color.borderStrong}`, borderRadius: 9, textAlign: 'left', font: `400 11.5px/1.75 ${font.mono}`, color: '#454F4A', background: color.subtleBg, whiteSpace: 'pre-wrap' }}
         >
           {receipt.lines
             .map(
@@ -866,37 +660,16 @@ function Receipt({
             .map((p) => `${p.method} ${formatRupiah(p.amount)}`)
             .join(', ')}
         </div>
-        <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
-          <button
-            type="button"
-            onClick={() => window.print()}
-            style={{
-              flex: 1,
-              padding: 12,
-              border: '1px solid #D6DDDA',
-              background: '#fff',
-              borderRadius: 8,
-            }}
-          >
+        <div style={{ display: 'flex', gap: 10 }}>
+          <Button variant="secondary" onClick={() => window.print()} style={{ flex: 1, padding: 12 }}>
             Cetak
-          </button>
-          <button
-            type="button"
-            onClick={onClose}
-            style={{
-              flex: 1,
-              padding: 12,
-              background: '#16211C',
-              color: '#fff',
-              border: 0,
-              borderRadius: 8,
-            }}
-          >
+          </Button>
+          <Button variant="primary" onClick={onClose} style={{ flex: 1, padding: 12 }}>
             Struk Baru
-          </button>
+          </Button>
         </div>
       </div>
-    </div>
+    </ModalOverlay>
   )
 }
 
@@ -952,125 +725,49 @@ function CloseSessionModal({
   }
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'rgba(10,18,15,.5)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <div
-        style={{
-          width: 420,
-          background: '#fff',
-          borderRadius: 12,
-          padding: 22,
-        }}
-      >
-        <h2 style={{ marginTop: 0, fontSize: 16 }}>
+    <ModalOverlay>
+      <div style={{ width: 460, background: '#fff', borderRadius: 14, overflow: 'hidden', boxShadow: '0 20px 50px rgba(0,0,0,.3)' }}>
+        <div style={{ padding: '18px 22px', borderBottom: `1px solid ${color.divider}`, font: `600 16px/1 ${font.sans}` }}>
           Tutup Sesi · {session.warehouse_code}
-        </h2>
-        {pendingLeft !== null && pendingLeft > 0 && (
-          <div
-            style={{
-              background: '#FDF6E7',
-              border: '1px solid #EFDCAF',
-              borderRadius: 8,
-              padding: 12,
-              fontSize: 12.5,
-              color: '#7A5A15',
-            }}
-          >
-            Masih ada {pendingLeft} struk belum tersinkron. Sambungkan internet
-            dan klik "Sinkron sekarang" dulu sebelum menutup sesi, supaya tidak
-            ada struk yang tertinggal.
-          </div>
-        )}
-        {!orders && (
-          <button
-            type="button"
-            onClick={loadRecap}
-            style={{
-              marginTop: 12,
-              padding: '10px 16px',
-              border: '1px solid #D6DDDA',
-              borderRadius: 8,
-              background: '#fff',
-            }}
-          >
-            Muat rekap sesi
-          </button>
-        )}
-        {orders && (
-          <>
-            <p style={{ fontSize: 13 }}>{orders.length} struk di sesi ini.</p>
-            <label>
-              Kas dihitung fisik (Rp)
-              <input
-                type="number"
-                value={countedCash}
-                onChange={(e) => setCountedCash(e.target.value)}
-                style={{
-                  display: 'block',
-                  width: '100%',
-                  padding: 8,
-                  marginTop: 4,
-                }}
-              />
-            </label>
-            <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
-              <button
-                type="button"
-                onClick={onCancel}
-                style={{
-                  flex: 'none',
-                  padding: '12px 18px',
-                  border: '1px solid #D6DDDA',
-                  background: '#fff',
-                  borderRadius: 8,
-                }}
-              >
-                Nanti
-              </button>
-              <button
-                type="button"
-                disabled={saving}
-                onClick={onConfirmClose}
-                style={{
-                  flex: 1,
-                  padding: 12,
-                  background: '#16211C',
-                  color: '#fff',
-                  border: 0,
-                  borderRadius: 8,
-                }}
-              >
-                {saving ? 'Menutup…' : 'Tutup & Bukukan'}
-              </button>
+        </div>
+        <div style={{ padding: 22 }}>
+          {pendingLeft !== null && pendingLeft > 0 && (
+            <div style={{ background: color.warnBg, border: `1px solid ${color.warnBorder}`, borderRadius: 9, padding: 12, font: `400 12.5px/1.5 ${font.sans}`, color: color.warnFg }}>
+              Masih ada {pendingLeft} struk belum tersinkron. Sambungkan internet dan klik &quot;Sinkron sekarang&quot; dulu sebelum menutup sesi, supaya tidak ada struk yang tertinggal.
             </div>
-          </>
-        )}
-        {!orders && (
-          <div style={{ marginTop: 12 }}>
-            <button
-              type="button"
-              onClick={onCancel}
-              style={{
-                padding: '10px 16px',
-                border: '1px solid #D6DDDA',
-                borderRadius: 8,
-                background: '#fff',
-              }}
-            >
-              Batal
-            </button>
-          </div>
-        )}
-        {error && <p style={{ color: '#C8362A' }}>{error}</p>}
+          )}
+          {!orders && (
+            <Button variant="secondary" onClick={loadRecap} style={{ marginTop: 12, padding: '10px 16px' }}>
+              Muat rekap sesi
+            </Button>
+          )}
+          {orders && (
+            <>
+              <p style={{ font: `400 13px/1.4 ${font.sans}`, color: color.textSubtle }}>{orders.length} struk di sesi ini.</p>
+              <Label>
+                Kas dihitung fisik (Rp)
+                <Input type="number" value={countedCash} onChange={(e) => setCountedCash(e.target.value)} />
+              </Label>
+              <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
+                <Button variant="secondary" onClick={onCancel} style={{ padding: '12px 18px' }}>
+                  Nanti
+                </Button>
+                <Button variant="primary" disabled={saving} onClick={onConfirmClose} style={{ flex: 1, padding: 13 }}>
+                  {saving ? 'Menutup…' : 'Tutup & Bukukan'}
+                </Button>
+              </div>
+            </>
+          )}
+          {!orders && (
+            <div style={{ marginTop: 12 }}>
+              <Button variant="secondary" onClick={onCancel} style={{ padding: '10px 16px' }}>
+                Batal
+              </Button>
+            </div>
+          )}
+          {error && <p style={{ color: color.brandRed, font: `500 13px/1.4 ${font.sans}` }}>{error}</p>}
+        </div>
       </div>
-    </div>
+    </ModalOverlay>
   )
 }

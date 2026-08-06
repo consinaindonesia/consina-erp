@@ -2,6 +2,8 @@ import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { useState } from 'react'
 import { listCategories, listAttributes, listUoms } from '#/server/catalog'
 import { addVariant, getProduct, updateProduct, updateVariant } from '#/server/products'
+import { Button, Card, ErrorText, Input, Label, PageBody, PageHeader, PageShell, SectionLabel, Select, table } from '#/components/ui'
+import { color, font } from '#/lib/theme'
 
 export const Route = createFileRoute('/products/$templateId')({
   component: EditProduct,
@@ -12,8 +14,6 @@ export const Route = createFileRoute('/products/$templateId')({
     attributes: await listAttributes(),
   }),
 })
-
-const inputStyle: React.CSSProperties = { display: 'block', width: '100%', padding: 8, marginTop: 4, boxSizing: 'border-box' }
 
 function EditProduct() {
   const { product, categories, uoms, attributes } = Route.useLoaderData()
@@ -58,91 +58,108 @@ function EditProduct() {
   }
 
   return (
-    <main style={{ fontFamily: 'system-ui, sans-serif', padding: 24, maxWidth: 760 }}>
-      <h1>Edit Produk</h1>
-      <form onSubmit={onSave} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-        <label>
-          Nama produk
-          <input value={name} onChange={(e) => setName(e.target.value)} required style={inputStyle} />
-        </label>
-        <div style={{ display: 'flex', gap: 14 }}>
-          <label style={{ flex: 1 }}>
-            Kategori
-            <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} style={inputStyle}>
-              <option value="">(tanpa kategori)</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label style={{ flex: 1 }}>
-            Satuan
-            <select value={uomId} onChange={(e) => setUomId(e.target.value)} required style={inputStyle}>
-              {uoms.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.name}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-        <div style={{ display: 'flex', gap: 14 }}>
-          <label style={{ flex: 1 }}>
-            Harga jual (Rp)
-            <input type="number" min="0" value={salePrice} onChange={(e) => setSalePrice(e.target.value)} style={inputStyle} />
-          </label>
-          <label style={{ flex: 1 }}>
-            Harga pokok (Rp)
-            <input type="number" min="0" value={costPrice} onChange={(e) => setCostPrice(e.target.value)} style={inputStyle} />
-          </label>
-          <label style={{ flex: 1 }}>
-            Titik pesan ulang
-            <input type="number" min="0" value={reorderPoint} onChange={(e) => setReorderPoint(e.target.value)} style={inputStyle} />
-          </label>
-        </div>
-        <label>
-          <input type="checkbox" checked={isManufactured} onChange={(e) => setIsManufactured(e.target.checked)} /> Diproduksi
-          sendiri
-        </label>
-        <label>
-          <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} /> Aktif
-        </label>
-        <div>
-          <button type="submit" disabled={saving} style={{ padding: '10px 18px', background: '#1F6F4A', color: '#fff', border: 0, borderRadius: 6 }}>
-            {saving ? 'Menyimpan…' : 'Simpan perubahan'}
-          </button>
-        </div>
-        {error && <p style={{ color: '#C8362A' }}>{error}</p>}
-      </form>
+    <PageShell>
+      <PageHeader title="Produk" />
+      <PageBody maxWidth={900}>
+        <h1 style={{ font: `600 20px/1.2 ${font.sans}`, margin: 0 }}>{template.name}</h1>
+        <Card>
+          <form onSubmit={onSave} style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: 20 }}>
+            <Label>
+              Nama produk
+              <Input value={name} onChange={(e) => setName(e.target.value)} required />
+            </Label>
+            <div style={{ display: 'flex', gap: 14 }}>
+              <div style={{ flex: 1 }}>
+                <Label>
+                  Kategori
+                  <Select value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
+                    <option value="">(tanpa kategori)</option>
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </Select>
+                </Label>
+              </div>
+              <div style={{ flex: 1 }}>
+                <Label>
+                  Satuan
+                  <Select value={uomId} onChange={(e) => setUomId(e.target.value)} required>
+                    {uoms.map((u) => (
+                      <option key={u.id} value={u.id}>
+                        {u.name}
+                      </option>
+                    ))}
+                  </Select>
+                </Label>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 14 }}>
+              <div style={{ flex: 1 }}>
+                <Label>
+                  Harga jual (Rp)
+                  <Input type="number" min="0" value={salePrice} onChange={(e) => setSalePrice(e.target.value)} />
+                </Label>
+              </div>
+              <div style={{ flex: 1 }}>
+                <Label>
+                  Harga pokok (Rp)
+                  <Input type="number" min="0" value={costPrice} onChange={(e) => setCostPrice(e.target.value)} />
+                </Label>
+              </div>
+              <div style={{ flex: 1 }}>
+                <Label>
+                  Titik pesan ulang
+                  <Input type="number" min="0" value={reorderPoint} onChange={(e) => setReorderPoint(e.target.value)} />
+                </Label>
+              </div>
+            </div>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, font: `400 13.5px/1 ${font.sans}`, color: color.textSubtle }}>
+              <input type="checkbox" checked={isManufactured} onChange={(e) => setIsManufactured(e.target.checked)} /> Diproduksi sendiri
+            </label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, font: `400 13.5px/1 ${font.sans}`, color: color.textSubtle }}>
+              <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} /> Aktif
+            </label>
+            <div>
+              <Button type="submit" variant="accent" disabled={saving} style={{ padding: '11px 18px', fontSize: 13.5 }}>
+                {saving ? 'Menyimpan…' : 'Simpan perubahan'}
+              </Button>
+            </div>
+            {error && <ErrorText>{error}</ErrorText>}
+          </form>
+        </Card>
 
-      <h2 style={{ fontSize: 16, marginTop: 28 }}>Varian</h2>
-      <table style={{ borderCollapse: 'collapse', width: '100%' }}>
-        <thead>
-          <tr>
-            <th style={th}>SKU</th>
-            <th style={th}>Barcode</th>
-            <th style={th}>Atribut</th>
-            <th style={th}>Aktif</th>
-            <th style={th}></th>
-          </tr>
-        </thead>
-        <tbody>
-          {variants.map((v) => (
-            <VariantRow key={v.id} variant={v} attributes={attributes} onSaved={() => router.invalidate()} />
-          ))}
-        </tbody>
-      </table>
+        <SectionLabel>Varian</SectionLabel>
+        <Card>
+          <div style={table.wrap}>
+            <table style={table.table}>
+              <thead>
+                <tr>
+                  <th style={table.th}>SKU</th>
+                  <th style={table.th}>Barcode</th>
+                  <th style={table.th}>Atribut</th>
+                  <th style={table.th}>Aktif</th>
+                  <th style={table.th}></th>
+                </tr>
+              </thead>
+              <tbody>
+                {variants.map((v) => (
+                  <VariantRow key={v.id} variant={v} attributes={attributes} onSaved={() => router.invalidate()} />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
 
-      <h2 style={{ fontSize: 16, marginTop: 20 }}>Tambah varian baru</h2>
-      <NewVariantForm templateId={template.id} attributes={attributes} onCreated={() => router.invalidate()} />
-    </main>
+        <SectionLabel>Tambah varian baru</SectionLabel>
+        <Card>
+          <NewVariantForm templateId={template.id} attributes={attributes} onCreated={() => router.invalidate()} />
+        </Card>
+      </PageBody>
+    </PageShell>
   )
 }
-
-const th: React.CSSProperties = { textAlign: 'left', borderBottom: '1px solid #E0E5E3', padding: 6, fontSize: 12.5 }
-const td: React.CSSProperties = { borderBottom: '1px solid #F0F3F1', padding: 6, fontSize: 13.5 }
 
 function VariantRow({
   variant,
@@ -180,21 +197,21 @@ function VariantRow({
 
   return (
     <tr>
-      <td style={td}>
-        <input value={sku} onChange={(e) => setSku(e.target.value)} style={{ width: 120, padding: 4 }} />
+      <td style={table.td}>
+        <Input value={sku} onChange={(e) => setSku(e.target.value)} style={{ width: 120, padding: '6px 8px' }} />
       </td>
-      <td style={td}>
-        <input value={barcode} onChange={(e) => setBarcode(e.target.value)} style={{ width: 140, padding: 4 }} />
+      <td style={table.td}>
+        <Input value={barcode} onChange={(e) => setBarcode(e.target.value)} style={{ width: 140, padding: '6px 8px' }} />
       </td>
-      <td style={td}>{valueNames || '—'}</td>
-      <td style={td}>
+      <td style={table.td}>{valueNames || '—'}</td>
+      <td style={table.td}>
         <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} />
       </td>
-      <td style={td}>
-        <button type="button" onClick={onSave} disabled={saving}>
+      <td style={table.td}>
+        <Button variant="secondary" onClick={onSave} disabled={saving} style={{ padding: '6px 12px', fontSize: 12 }}>
           {saving ? '…' : 'Simpan'}
-        </button>
-        {error && <span style={{ color: '#C8362A', fontSize: 12, marginLeft: 6 }}>{error}</span>}
+        </Button>
+        {error && <span style={{ color: color.brandRed, fontSize: 12, marginLeft: 6 }}>{error}</span>}
       </td>
     </tr>
   )
@@ -240,28 +257,23 @@ function NewVariantForm({
   }
 
   return (
-    <form onSubmit={onSubmit} style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-      <input placeholder="SKU" value={sku} onChange={(e) => setSku(e.target.value)} required style={{ width: 140, padding: 6 }} />
-      <input placeholder="Barcode (opsional)" value={barcode} onChange={(e) => setBarcode(e.target.value)} style={{ width: 160, padding: 6 }} />
+    <form onSubmit={onSubmit} style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', padding: 18 }}>
+      <Input placeholder="SKU" value={sku} onChange={(e) => setSku(e.target.value)} required style={{ width: 140 }} />
+      <Input placeholder="Barcode (opsional)" value={barcode} onChange={(e) => setBarcode(e.target.value)} style={{ width: 160 }} />
       {attributes.map((attr) => (
-        <select
-          key={attr.id}
-          value={values[attr.id] ?? ''}
-          onChange={(e) => setValues((v) => ({ ...v, [attr.id]: e.target.value }))}
-          style={{ padding: 6 }}
-        >
+        <Select key={attr.id} value={values[attr.id] ?? ''} onChange={(e) => setValues((v) => ({ ...v, [attr.id]: e.target.value }))}>
           <option value="">{attr.name}: —</option>
           {attr.product_attribute_value.map((val) => (
             <option key={val.id} value={val.id}>
               {attr.name}: {val.name}
             </option>
           ))}
-        </select>
+        </Select>
       ))}
-      <button type="submit" disabled={saving}>
+      <Button type="submit" variant="accent" disabled={saving} style={{ padding: '9px 14px', fontSize: 12.5 }}>
         {saving ? 'Menyimpan…' : 'Tambah varian'}
-      </button>
-      {error && <span style={{ color: '#C8362A', fontSize: 12.5 }}>{error}</span>}
+      </Button>
+      {error && <span style={{ color: color.brandRed, font: `500 12.5px/1 ${font.sans}` }}>{error}</span>}
     </form>
   )
 }

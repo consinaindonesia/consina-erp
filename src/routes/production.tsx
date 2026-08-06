@@ -10,6 +10,8 @@ import {
   listManufacturableProducts,
   listManufacturingOrders,
 } from '#/server/production'
+import { Badge, Button, Card, CardBody, ErrorText, Input, Label, PageBody, PageHeader, PageShell, SectionLabel, Select, Title } from '#/components/ui'
+import { color, font } from '#/lib/theme'
 
 export const Route = createFileRoute('/production')({
   component: Production,
@@ -127,164 +129,161 @@ function Production() {
   const nextPendingIndex = detail ? detail.workOrders.findIndex((w) => w.state !== 'done') : -1
 
   return (
-    <main style={{ fontFamily: 'system-ui, sans-serif', padding: 24, maxWidth: 900 }}>
-      <h1>Produksi</h1>
-
-      <section style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, alignItems: 'start' }}>
-        <div>
-          <h2 style={{ fontSize: 18 }}>Buat Manufacturing Order</h2>
-          <form onSubmit={onCreate} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <label>
-              Produk (resep)
-              <select value={bomId} onChange={(e) => setBomId(e.target.value)} style={{ display: 'block', width: '100%', padding: 8, marginTop: 4 }}>
-                {boms.map((b) => (
-                  <option key={b.id} value={b.id}>
-                    {b.template.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Varian
-              <select value={variantId} onChange={(e) => setVariantId(e.target.value)} style={{ display: 'block', width: '100%', padding: 8, marginTop: 4 }}>
-                {selectedBom?.template.variants.map((v) => (
-                  <option key={v.id} value={v.id}>
-                    {v.sku}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Gudang
-              <select value={warehouseId} onChange={(e) => setWarehouseId(e.target.value)} style={{ display: 'block', width: '100%', padding: 8, marginTop: 4 }}>
-                {warehouses.map((w) => (
-                  <option key={w.id} value={w.id}>
-                    {w.code} — {w.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Jumlah rencana
-              <input
-                type="number"
-                min="0.01"
-                step="0.01"
-                value={qtyPlanned}
-                onChange={(e) => setQtyPlanned(e.target.value)}
-                style={{ display: 'block', width: '100%', padding: 8, marginTop: 4 }}
-              />
-            </label>
-
-            {availability && (
-              <div style={{ fontSize: 14, border: '1px solid #ddd', borderRadius: 6, padding: 10 }}>
-                <strong>Ketersediaan bahan</strong>
-                <table style={{ width: '100%', marginTop: 6 }}>
-                  <tbody>
-                    {availability.map((a) => (
-                      <tr key={a.variant_id} style={{ color: a.sufficient ? '#1F6F4A' : '#C8362A' }}>
-                        <td>{a.name} ({a.sku})</td>
-                        <td style={{ textAlign: 'right' }}>
-                          butuh {a.needed} / tersedia {a.available}
-                        </td>
-                      </tr>
+    <PageShell>
+      <PageHeader title="Produksi" />
+      <PageBody maxWidth={1000}>
+        <section style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, alignItems: 'start' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <SectionLabel>Buat Manufacturing Order</SectionLabel>
+            <Card>
+              <form onSubmit={onCreate} style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: 18 }}>
+                <Label>
+                  Produk (resep)
+                  <Select value={bomId} onChange={(e) => setBomId(e.target.value)}>
+                    {boms.map((b) => (
+                      <option key={b.id} value={b.id}>
+                        {b.template.name}
+                      </option>
                     ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
+                  </Select>
+                </Label>
+                <Label>
+                  Varian
+                  <Select value={variantId} onChange={(e) => setVariantId(e.target.value)}>
+                    {selectedBom?.template.variants.map((v) => (
+                      <option key={v.id} value={v.id}>
+                        {v.sku}
+                      </option>
+                    ))}
+                  </Select>
+                </Label>
+                <Label>
+                  Gudang
+                  <Select value={warehouseId} onChange={(e) => setWarehouseId(e.target.value)}>
+                    {warehouses.map((w) => (
+                      <option key={w.id} value={w.id}>
+                        {w.code} — {w.name}
+                      </option>
+                    ))}
+                  </Select>
+                </Label>
+                <Label>
+                  Jumlah rencana
+                  <Input type="number" min="0.01" step="0.01" value={qtyPlanned} onChange={(e) => setQtyPlanned(e.target.value)} />
+                </Label>
 
-            <div>
-              <button
-                type="submit"
-                disabled={creating || (availability !== null && availability.some((a) => !a.sufficient))}
-                style={{ padding: '10px 18px', background: '#1F6F4A', color: '#fff', border: 0, borderRadius: 6 }}
-              >
-                {creating ? 'Membuat…' : 'Buat MO'}
-              </button>
-            </div>
-          </form>
-        </div>
+                {availability && (
+                  <div style={{ font: `400 13px/1.4 ${font.sans}`, border: `1px solid ${color.border}`, borderRadius: 9, padding: 12 }}>
+                    <SectionLabel>Ketersediaan bahan</SectionLabel>
+                    <table style={{ width: '100%', marginTop: 8, borderCollapse: 'collapse' }}>
+                      <tbody>
+                        {availability.map((a) => (
+                          <tr key={a.variant_id}>
+                            <td style={{ padding: '4px 0', color: color.textSubtle, font: `400 13px/1.4 ${font.sans}` }}>
+                              {a.name} ({a.sku})
+                            </td>
+                            <td style={{ padding: '4px 0', textAlign: 'right', font: `500 12.5px/1 ${font.mono}`, color: a.sufficient ? color.brandGreen : color.brandRed }}>
+                              butuh {a.needed} / tersedia {a.available}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
 
-        <div>
-          <h2 style={{ fontSize: 18 }}>Daftar Manufacturing Order</h2>
-          <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {orders.map((o) => (
-              <li key={o.id}>
+                <div>
+                  <Button
+                    type="submit"
+                    variant="accent"
+                    disabled={creating || (availability !== null && availability.some((a) => !a.sufficient))}
+                    style={{ padding: '11px 18px', fontSize: 13.5 }}
+                  >
+                    {creating ? 'Membuat…' : 'Buat MO'}
+                  </Button>
+                </div>
+                {error && <ErrorText>{error}</ErrorText>}
+              </form>
+            </Card>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <SectionLabel>Daftar Manufacturing Order</SectionLabel>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {orders.map((o) => (
                 <button
+                  key={o.id}
                   type="button"
                   onClick={() => loadDetail(o.id)}
                   style={{
                     width: '100%',
                     textAlign: 'left',
-                    padding: 10,
-                    border: '1px solid #ddd',
-                    borderRadius: 6,
-                    background: selectedMoId === o.id ? '#f0f7f3' : '#fff',
+                    padding: 12,
+                    border: `1px solid ${color.border}`,
+                    borderRadius: 9,
+                    background: selectedMoId === o.id ? color.successBg : '#fff',
+                    cursor: 'pointer',
                   }}
                 >
-                  <strong>{o.reference}</strong> — {o.variant.template.name} ({o.variant.sku})
+                  <span style={{ font: `600 13.5px/1.3 ${font.sans}`, color: color.text }}>{o.reference}</span>
+                  <span style={{ font: `400 13px/1.3 ${font.sans}`, color: color.textSubtle }}>
+                    {' '}
+                    — {o.variant.template.name} ({o.variant.sku})
+                  </span>
                   <br />
-                  <span style={{ fontSize: 13, color: '#555' }}>
+                  <span style={{ font: `400 12px/1.6 ${font.mono}`, color: color.textMuted }}>
                     {o.state} · rencana {o.qty_planned} · hasil {o.qty_produced} · {o.warehouse?.code}
                   </span>
                 </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-
-      {error && <p style={{ color: '#C8362A' }}>{error}</p>}
-
-      {detail && (
-        <section style={{ marginTop: 32, borderTop: '1px solid #ddd', paddingTop: 20 }}>
-          <h2 style={{ fontSize: 18 }}>
-            {detail.mo.reference} — {detail.mo.variant.template.name} ({detail.mo.variant.sku})
-          </h2>
-          <p>
-            Status: <strong>{detail.mo.state}</strong> · Rencana: {detail.mo.qty_planned} · Hasil: {detail.mo.qty_produced} · Gudang: {detail.mo.warehouse?.name}
-          </p>
-
-          <h3 style={{ fontSize: 16 }}>Operasi</h3>
-          <ol style={{ paddingLeft: 20 }}>
-            {detail.workOrders.map((w, i) => (
-              <li key={w.id} style={{ marginBottom: 6 }}>
-                [{w.work_center.code}] {w.name} — <strong>{w.state}</strong>{' '}
-                {w.state !== 'done' && detail.mo.state !== 'done' && (
-                  <button type="button" disabled={busy || i !== nextPendingIndex} onClick={() => onCompleteWorkOrder(w.id)}>
-                    Tandai selesai
-                  </button>
-                )}
-              </li>
-            ))}
-          </ol>
-
-          {detail.mo.state !== 'done' && (
-            <form onSubmit={onFinishProduction} style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 12 }}>
-              <label>
-                Jumlah hasil aktual
-                <input
-                  type="number"
-                  min="0.01"
-                  step="0.01"
-                  value={qtyProduced}
-                  onChange={(e) => setQtyProduced(e.target.value)}
-                  style={{ display: 'block', padding: 8, marginTop: 4, width: 140 }}
-                />
-              </label>
-              <button
-                type="submit"
-                disabled={busy || !allOpsDone}
-                style={{ padding: '10px 18px', background: '#1F6F4A', color: '#fff', border: 0, borderRadius: 6 }}
-              >
-                Selesaikan Produksi
-              </button>
-              {!allOpsDone && <span style={{ fontSize: 13, color: '#888' }}>Selesaikan semua operasi dulu.</span>}
-            </form>
-          )}
+              ))}
+            </div>
+          </div>
         </section>
-      )}
-    </main>
+
+        {detail && (
+          <Card>
+            <CardBody style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div>
+                <Title>
+                  {detail.mo.reference} — {detail.mo.variant.template.name} ({detail.mo.variant.sku})
+                </Title>
+                <p style={{ margin: '6px 0 0', font: `400 13px/1.4 ${font.sans}`, color: color.textSubtle }}>
+                  Status: <strong>{detail.mo.state}</strong> · Rencana: {detail.mo.qty_planned} · Hasil: {detail.mo.qty_produced} · Gudang: {detail.mo.warehouse?.name}
+                </p>
+              </div>
+
+              <SectionLabel>Operasi</SectionLabel>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {detail.workOrders.map((w, i) => (
+                  <div key={w.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: `1px solid ${color.dividerSoft}` }}>
+                    <span style={{ font: `600 12px/1 ${font.mono}`, color: color.textMuted }}>[{w.work_center.code}]</span>
+                    <span style={{ font: `500 13.5px/1 ${font.sans}`, flex: 1 }}>{w.name}</span>
+                    <Badge tone={w.state === 'done' ? 'success' : 'neutral'}>{w.state}</Badge>
+                    {w.state !== 'done' && detail.mo.state !== 'done' && (
+                      <Button variant="secondary" disabled={busy || i !== nextPendingIndex} onClick={() => onCompleteWorkOrder(w.id)}>
+                        Tandai selesai
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {detail.mo.state !== 'done' && (
+                <form onSubmit={onFinishProduction} style={{ display: 'flex', gap: 10, alignItems: 'flex-end', marginTop: 4 }}>
+                  <Label>
+                    Jumlah hasil aktual
+                    <Input type="number" min="0.01" step="0.01" value={qtyProduced} onChange={(e) => setQtyProduced(e.target.value)} style={{ width: 140 }} />
+                  </Label>
+                  <Button type="submit" variant="accent" disabled={busy || !allOpsDone} style={{ padding: '11px 18px', fontSize: 13.5 }}>
+                    Selesaikan Produksi
+                  </Button>
+                  {!allOpsDone && <span style={{ font: `400 12.5px/1 ${font.sans}`, color: color.textMuted }}>Selesaikan semua operasi dulu.</span>}
+                </form>
+              )}
+            </CardBody>
+          </Card>
+        )}
+      </PageBody>
+    </PageShell>
   )
 }

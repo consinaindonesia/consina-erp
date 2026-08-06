@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
+import { Card, PageBody, PageHeader, PageShell, table } from '#/components/ui'
 import { listProducts } from '#/server/products'
+import { color, font } from '#/lib/theme'
 
 export const Route = createFileRoute('/products/')({
   component: ProductList,
@@ -10,48 +12,53 @@ function ProductList() {
   const products = Route.useLoaderData()
 
   return (
-    <main style={{ fontFamily: 'system-ui, sans-serif', padding: 24, maxWidth: 900 }}>
-      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
-        <h1>Produk</h1>
-        <Link to="/products/new" style={{ color: '#1F6F4A', fontWeight: 600 }}>
-          + Tambah produk
-        </Link>
-      </div>
-      <table style={{ borderCollapse: 'collapse', width: '100%' }}>
-        <thead>
-          <tr>
-            <th style={th}>Nama</th>
-            <th style={th}>Kategori</th>
-            <th style={th}>Satuan</th>
-            <th style={th}>Produksi sendiri?</th>
-            <th style={th}>Varian</th>
-            <th style={th}>Harga jual</th>
-          </tr>
-        </thead>
-        <tbody>
-          {products.map((p) => (
-            <tr key={p.id}>
-              <td style={td}>
-                <Link to="/products/$templateId" params={{ templateId: p.id }} style={{ color: '#1B211E' }}>
-                  {p.name}
-                </Link>
-              </td>
-              <td style={td}>{p.category?.name ?? '—'}</td>
-              <td style={td}>{p.uom.name}</td>
-              <td style={td}>{p.is_manufactured ? 'Ya' : 'Tidak'}</td>
-              <td style={td}>{p.variant_count}</td>
-              <td style={td}>{formatRupiah(p.sale_price)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </main>
+    <PageShell>
+      <PageHeader
+        title="Produk"
+        right={
+          <Link to="/products/new" style={{ color: '#fff', font: `600 12.5px/1 ${font.sans}` }}>
+            + Tambah produk
+          </Link>
+        }
+      />
+      <PageBody maxWidth={1000}>
+        <Card>
+          <div style={table.wrap}>
+            <table style={table.table}>
+              <thead>
+                <tr>
+                  <th style={table.th}>Nama</th>
+                  <th style={table.th}>Kategori</th>
+                  <th style={table.th}>Satuan</th>
+                  <th style={table.th}>Produksi sendiri?</th>
+                  <th style={{ ...table.th, ...table.thRight }}>Varian</th>
+                  <th style={{ ...table.th, ...table.thRight }}>Harga jual</th>
+                </tr>
+              </thead>
+              <tbody>
+                {products.map((p) => (
+                  <tr key={p.id}>
+                    <td style={table.td}>
+                      <Link to="/products/$templateId" params={{ templateId: p.id }} style={{ color: color.text, fontWeight: 500 }}>
+                        {p.name}
+                      </Link>
+                    </td>
+                    <td style={table.td}>{p.category?.name ?? '—'}</td>
+                    <td style={table.td}>{p.uom.name}</td>
+                    <td style={table.td}>{p.is_manufactured ? 'Ya' : 'Tidak'}</td>
+                    <td style={{ ...table.td, ...table.tdRight, ...table.tdMono }}>{p.variant_count}</td>
+                    <td style={{ ...table.td, ...table.tdRight, ...table.tdMono }}>{formatRupiah(p.sale_price)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      </PageBody>
+    </PageShell>
   )
 }
 
 function formatRupiah(n: number) {
   return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(n)
 }
-
-const th: React.CSSProperties = { textAlign: 'left', borderBottom: '1px solid #E0E5E3', padding: 6, fontSize: 12.5 }
-const td: React.CSSProperties = { borderBottom: '1px solid #F0F3F1', padding: 6, fontSize: 13.5 }

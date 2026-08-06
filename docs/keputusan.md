@@ -429,3 +429,63 @@ membaca kode.
 - **Ini milestone terakhir di `rencana-build.md`.** Semua M0–M7
   selesai. Langkah selanjutnya (kalau ada) di luar rencana asli —
   tunggu instruksi pemilik proyek, bukan diasumsikan.
+
+## Penyesuaian tampilan ke mockup desain asli (2026-08-06)
+
+Di luar rencana-build.md — pemilik menunjukkan tampilan aplikasi
+sungguhan (M0–M7, styling inline seadanya) beda jauh dari mockup
+desain awal proyek (`ERP Retail Mockup.dc.html`, sumber acuan yang
+sejak awal mendefinisikan alur & modul M0–M7). Pemilik minta
+disamakan, semua halaman sekaligus.
+
+- **Token warna & font diambil PERSIS dari source file mockup**
+  (`ERP Retail Mockup.dc.html`), bukan ditebak dari screenshot —
+  file HTML mentahnya ditemukan tersimpan lokal di
+  `~/Downloads/UI Mockup Odoo Kasir/`, jadi warna hex, ukuran font,
+  dan spacing bisa disalin langsung: font IBM Plex Sans (teks) +
+  IBM Plex Mono (angka/label/kode), latar gelap `#0E1512`/`#16211C`,
+  aksen merah `#C8362A` (tab aktif/danger) dan hijau `#1F6F4A`
+  (aksi utama/POS), kartu putih `#fff` border `#E0E5E3` radius 11px.
+  Disimpan di `src/lib/theme.ts`.
+- **Primitif UI bersama (`src/components/ui.tsx`)**: `PageShell`,
+  `PageHeader`, `Card`, `Badge`, `Button` (varian primary/accent/
+  secondary/danger-outline), `Input`, `Select`, `Label`, `table`
+  (style object untuk `<table>` asli, bukan komponen tabel
+  terpisah) — dipakai di SEMUA 14 file route supaya tidak ada lagi
+  warna/ukuran hex yang diulang-ulang beda-beda per file seperti
+  sebelumnya. Ini bukan abstraksi berlebihan: pola kartu+form+badge
+  yang sama muncul di hampir setiap halaman (Kategori, Satuan,
+  Atribut, Penerimaan, Transfer, Opname, Produksi, Work Center,
+  Laporan semua punya bentuk kartu/tabel yang identik).
+  - **Struktur mockup TIDAK disalin 1:1**: mockup mengelompokkan
+    fitur jadi 8 "layar" dengan sub-tab di dalamnya (mis. layar
+    "Persediaan" berisi sub-tab Receipts/Internal Transfer/Dalam
+    Perjalanan/Opname). Aplikasi sungguhan tetap pakai navigasi
+    datar 13 item seperti sebelumnya (satu per fitur) — cuma
+    TAMPILANNYA yang disamakan (warna, font, kartu, badge, tombol),
+    bukan susunan menunya. Menyusun ulang jadi menu bertingkat
+    adalah pekerjaan terpisah yang lebih besar (perlu halaman
+    Ringkasan/dashboard baru yang belum ada), belum diminta di sesi
+    ini.
+  - **"Device frame" mockup (kotak melayang dengan box-shadow,
+    lebar tetap 1194px/1440px) sengaja TIDAK ditiru** — itu cuma
+    trik presentasi di file mockup supaya beberapa ukuran layar bisa
+    dibandingkan berdampingan dalam satu file. Aplikasi sungguhan
+    mengisi lebar browser secara wajar; yang diambil dari mockup
+    cuma warna & bentuk komponen DI DALAM frame itu (header gelap,
+    kartu putih, dst.), bukan bingkainya.
+  - Halaman Kasir (POS) dibuat paling mendekati mockup persis
+    (header sesi hijau tua + avatar merah, badge status sinkron,
+    kartu produk dengan swatch berlabel 2 huruf pertama SKU, panel
+    struk kanan, modal pembayaran) karena itu satu-satunya layar
+    yang benar-benar didetailkan penuh di mockup sampai ke modal
+    pembayaran & tutup sesi.
+  - Font IBM Plex Sans/Mono dimuat lewat Google Fonts di
+    `src/routes/__root.tsx` (link `<head>`), sama seperti cara
+    mockup memuatnya — bukan file font lokal.
+  - Tidak ada perubahan skema database maupun logika bisnis sama
+    sekali di langkah ini — murni tampilan. Jadi tidak perlu jalankan
+    `cek-kesehatan.sql` ulang (tidak ada yang mungkin rusak di sisi
+    data), tapi test suite tetap dijalankan ulang untuk pastikan
+    tidak ada regresi fungsional dari refactor JSX-nya, dan semuanya
+    tetap hijau (12/12 lulus).

@@ -2,6 +2,8 @@ import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { useState } from 'react'
 import { listWarehouses } from '#/server/locations'
 import { listInTransit, listVariantsForPicker, transferReceive, transferSend } from '#/server/stock'
+import { Badge, Button, Card, CardBody, ErrorText, Input, Label, PageBody, PageHeader, PageShell, SectionLabel, Select } from '#/components/ui'
+import { color, font } from '#/lib/theme'
 
 export const Route = createFileRoute('/transfer')({
   component: Transfer,
@@ -53,72 +55,80 @@ function Transfer() {
   }
 
   return (
-    <main style={{ fontFamily: 'system-ui, sans-serif', padding: 24, maxWidth: 900 }}>
-      <h1>Transfer Antar Gudang</h1>
-      <p style={{ color: '#5A6661', fontSize: 13.5 }}>
-        Transfer selalu dua langkah: kirim ke transit, baru diterima di tujuan. Barang tidak pernah hilang di tengah jalan.
-      </p>
+    <PageShell>
+      <PageHeader title="Transfer Antar Gudang" />
+      <PageBody maxWidth={860}>
+        <p style={{ font: `400 13px/1.5 ${font.sans}`, color: color.textSubtle, margin: 0 }}>
+          Transfer selalu dua langkah: kirim ke transit, baru diterima di tujuan. Barang tidak pernah hilang di tengah jalan.
+        </p>
 
-      <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14, maxWidth: 600 }}>
-        <div style={{ display: 'flex', gap: 14 }}>
-          <label style={{ flex: 1 }}>
-            Dari
-            <select value={srcWarehouseId} onChange={(e) => setSrcWarehouseId(e.target.value)} style={{ display: 'block', width: '100%', padding: 8, marginTop: 4 }}>
-              {warehouses.map((w) => (
-                <option key={w.id} value={w.id}>
-                  {w.code} — {w.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label style={{ flex: 1 }}>
-            Ke
-            <select value={destWarehouseId} onChange={(e) => setDestWarehouseId(e.target.value)} style={{ display: 'block', width: '100%', padding: 8, marginTop: 4 }}>
-              {warehouses.map((w) => (
-                <option key={w.id} value={w.id}>
-                  {w.code} — {w.name}
-                </option>
-              ))}
-            </select>
-          </label>
+        <Card style={{ maxWidth: 620 }}>
+          <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14, padding: 20 }}>
+            <div style={{ display: 'flex', gap: 14 }}>
+              <div style={{ flex: 1 }}>
+                <Label>
+                  Dari
+                  <Select value={srcWarehouseId} onChange={(e) => setSrcWarehouseId(e.target.value)}>
+                    {warehouses.map((w) => (
+                      <option key={w.id} value={w.id}>
+                        {w.code} — {w.name}
+                      </option>
+                    ))}
+                  </Select>
+                </Label>
+              </div>
+              <div style={{ flex: 1 }}>
+                <Label>
+                  Ke
+                  <Select value={destWarehouseId} onChange={(e) => setDestWarehouseId(e.target.value)}>
+                    {warehouses.map((w) => (
+                      <option key={w.id} value={w.id}>
+                        {w.code} — {w.name}
+                      </option>
+                    ))}
+                  </Select>
+                </Label>
+              </div>
+            </div>
+
+            {lines.map((l, i) => (
+              <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <Select value={l.variant_id} onChange={(e) => updateLine(i, { variant_id: e.target.value })} style={{ flex: 1 }}>
+                  <option value="">Pilih varian…</option>
+                  {variants.map((v) => (
+                    <option key={v.id} value={v.id}>
+                      {v.template.name} ({v.sku})
+                    </option>
+                  ))}
+                </Select>
+                <Input type="number" min="0.01" step="0.01" value={l.qty} onChange={(e) => updateLine(i, { qty: e.target.value })} style={{ width: 100 }} />
+                <Button variant="secondary" onClick={() => setLines((rows) => rows.filter((_, idx) => idx !== i))} disabled={lines.length === 1}>
+                  Hapus
+                </Button>
+              </div>
+            ))}
+            <Button variant="secondary" onClick={() => setLines((rows) => [...rows, emptyLine()])} style={{ alignSelf: 'flex-start' }}>
+              + Tambah baris
+            </Button>
+
+            <div>
+              <Button type="submit" variant="primary" disabled={saving} style={{ padding: '11px 18px', fontSize: 13.5 }}>
+                {saving ? 'Mengirim…' : 'Kirim ke Transit'}
+              </Button>
+            </div>
+            {error && <ErrorText>{error}</ErrorText>}
+          </form>
+        </Card>
+
+        <SectionLabel>Barang Dalam Perjalanan</SectionLabel>
+        {inTransit.length === 0 && <p style={{ font: `400 13.5px/1.5 ${font.sans}`, color: color.textMuted }}>Tidak ada barang yang sedang dalam perjalanan.</p>}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {inTransit.map((p) => (
+            <InTransitCard key={p.id} picking={p} onReceived={() => router.invalidate()} />
+          ))}
         </div>
-
-        {lines.map((l, i) => (
-          <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <select value={l.variant_id} onChange={(e) => updateLine(i, { variant_id: e.target.value })} style={{ flex: 1, padding: 8 }}>
-              <option value="">Pilih varian…</option>
-              {variants.map((v) => (
-                <option key={v.id} value={v.id}>
-                  {v.template.name} ({v.sku})
-                </option>
-              ))}
-            </select>
-            <input type="number" min="0.01" step="0.01" value={l.qty} onChange={(e) => updateLine(i, { qty: e.target.value })} style={{ width: 100, padding: 8 }} />
-            <button type="button" onClick={() => setLines((rows) => rows.filter((_, idx) => idx !== i))} disabled={lines.length === 1}>
-              Hapus
-            </button>
-          </div>
-        ))}
-        <button type="button" onClick={() => setLines((rows) => [...rows, emptyLine()])} style={{ alignSelf: 'flex-start' }}>
-          + Tambah baris
-        </button>
-
-        <div>
-          <button type="submit" disabled={saving} style={{ padding: '10px 18px', background: '#16211C', color: '#fff', border: 0, borderRadius: 6 }}>
-            {saving ? 'Mengirim…' : 'Kirim ke Transit'}
-          </button>
-        </div>
-        {error && <p style={{ color: '#C8362A' }}>{error}</p>}
-      </form>
-
-      <h2 style={{ fontSize: 16, marginTop: 32 }}>Barang Dalam Perjalanan</h2>
-      {inTransit.length === 0 && <p style={{ color: '#84918B' }}>Tidak ada barang yang sedang dalam perjalanan.</p>}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {inTransit.map((p) => (
-          <InTransitCard key={p.id} picking={p} onReceived={() => router.invalidate()} />
-        ))}
-      </div>
-    </main>
+      </PageBody>
+    </PageShell>
   )
 }
 
@@ -153,24 +163,31 @@ function InTransitCard({
   }
 
   return (
-    <div style={{ border: '1px solid #E0E5E3', borderRadius: 8, padding: 14 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-        <strong>{picking.reference}</strong>
-        <span style={{ fontSize: 12.5, color: '#84918B' }}>
-          {picking.src?.code} → {picking.dest?.code}
-        </span>
-      </div>
-      <ul style={{ margin: '8px 0' }}>
-        {picking.lines.map((l, i) => (
-          <li key={i}>
-            {l.variant?.template?.name} ({l.variant?.sku}) — {l.qty_done} unit
-          </li>
-        ))}
-      </ul>
-      <button type="button" onClick={onReceive} disabled={receiving} style={{ padding: '7px 14px', border: '1px solid #1F6F4A', background: '#fff', color: '#1F6F4A', borderRadius: 6 }}>
-        {receiving ? 'Menerima…' : 'Terima di tujuan'}
-      </button>
-      {error && <p style={{ color: '#C8362A', fontSize: 12.5 }}>{error}</p>}
-    </div>
+    <Card style={{ maxWidth: 620 }}>
+      <CardBody>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+          <span style={{ font: `600 13px/1 ${font.mono}`, color: color.textStrong }}>{picking.reference}</span>
+          <Badge>
+            {picking.src?.code} → {picking.dest?.code}
+          </Badge>
+        </div>
+        <ul style={{ margin: '10px 0', paddingLeft: 18, font: `400 13px/1.6 ${font.sans}`, color: color.textSubtle }}>
+          {picking.lines.map((l, i) => (
+            <li key={i}>
+              {l.variant?.template?.name} ({l.variant?.sku}) — {l.qty_done} unit
+            </li>
+          ))}
+        </ul>
+        <Button
+          variant="secondary"
+          onClick={onReceive}
+          disabled={receiving}
+          style={{ border: `1px solid ${color.brandGreen}`, color: color.brandGreen }}
+        >
+          {receiving ? 'Menerima…' : 'Terima di tujuan'}
+        </Button>
+        {error && <ErrorText>{error}</ErrorText>}
+      </CardBody>
+    </Card>
   )
 }

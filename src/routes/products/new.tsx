@@ -1,7 +1,9 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
+import { Button, Card, ErrorText, Input, Label, PageBody, PageHeader, PageShell, SectionLabel, Select } from '#/components/ui'
 import { listCategories, listAttributes, listUoms } from '#/server/catalog'
 import { createProduct } from '#/server/products'
+import { color, font } from '#/lib/theme'
 
 export const Route = createFileRoute('/products/new')({
   component: NewProduct,
@@ -73,106 +75,103 @@ function NewProduct() {
   }
 
   return (
-    <main style={{ fontFamily: 'system-ui, sans-serif', padding: 24, maxWidth: 760 }}>
-      <h1>Tambah Produk</h1>
-      <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-        <label>
-          Nama produk
-          <input value={name} onChange={(e) => setName(e.target.value)} required style={inputStyle} />
-        </label>
+    <PageShell>
+      <PageHeader title="Produk" />
+      <PageBody maxWidth={780}>
+        <h1 style={{ font: `600 20px/1.2 ${font.sans}`, margin: 0 }}>Tambah Produk</h1>
+        <Card>
+          <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: 20 }}>
+            <Label>
+              Nama produk
+              <Input value={name} onChange={(e) => setName(e.target.value)} required />
+            </Label>
 
-        <div style={{ display: 'flex', gap: 14 }}>
-          <label style={{ flex: 1 }}>
-            Kategori
-            <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} style={inputStyle}>
-              <option value="">(tanpa kategori)</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label style={{ flex: 1 }}>
-            Satuan
-            <select value={uomId} onChange={(e) => setUomId(e.target.value)} required style={inputStyle}>
-              {uoms.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.name}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
+            <div style={{ display: 'flex', gap: 14 }}>
+              <div style={{ flex: 1 }}>
+                <Label>
+                  Kategori
+                  <Select value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
+                    <option value="">(tanpa kategori)</option>
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </Select>
+                </Label>
+              </div>
+              <div style={{ flex: 1 }}>
+                <Label>
+                  Satuan
+                  <Select value={uomId} onChange={(e) => setUomId(e.target.value)} required>
+                    {uoms.map((u) => (
+                      <option key={u.id} value={u.id}>
+                        {u.name}
+                      </option>
+                    ))}
+                  </Select>
+                </Label>
+              </div>
+            </div>
 
-        <div style={{ display: 'flex', gap: 14 }}>
-          <label style={{ flex: 1 }}>
-            Harga jual (Rp)
-            <input type="number" min="0" value={salePrice} onChange={(e) => setSalePrice(e.target.value)} style={inputStyle} />
-          </label>
-          <label style={{ flex: 1 }}>
-            Harga pokok (Rp)
-            <input type="number" min="0" value={costPrice} onChange={(e) => setCostPrice(e.target.value)} style={inputStyle} />
-          </label>
-        </div>
+            <div style={{ display: 'flex', gap: 14 }}>
+              <div style={{ flex: 1 }}>
+                <Label>
+                  Harga jual (Rp)
+                  <Input type="number" min="0" value={salePrice} onChange={(e) => setSalePrice(e.target.value)} />
+                </Label>
+              </div>
+              <div style={{ flex: 1 }}>
+                <Label>
+                  Harga pokok (Rp)
+                  <Input type="number" min="0" value={costPrice} onChange={(e) => setCostPrice(e.target.value)} />
+                </Label>
+              </div>
+            </div>
 
-        <label>
-          <input type="checkbox" checked={isManufactured} onChange={(e) => setIsManufactured(e.target.checked)} /> Diproduksi
-          sendiri (butuh resep/BOM)
-        </label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, font: `400 13.5px/1 ${font.sans}`, color: color.textSubtle }}>
+              <input type="checkbox" checked={isManufactured} onChange={(e) => setIsManufactured(e.target.checked)} /> Diproduksi
+              sendiri (butuh resep/BOM)
+            </label>
 
-        <h2 style={{ fontSize: 16, marginTop: 8 }}>Varian</h2>
-        {variants.map((v, i) => (
-          <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-            <input
-              placeholder="SKU"
-              value={v.sku}
-              onChange={(e) => updateVariant(i, { sku: e.target.value })}
-              style={{ ...inputStyle, width: 140 }}
-            />
-            <input
-              placeholder="Barcode (opsional)"
-              value={v.barcode}
-              onChange={(e) => updateVariant(i, { barcode: e.target.value })}
-              style={{ ...inputStyle, width: 160 }}
-            />
-            {attributes.map((attr) => (
-              <select
-                key={attr.id}
-                value={v.values[attr.id] ?? ''}
-                onChange={(e) => updateVariantValue(i, attr.id, e.target.value)}
-                style={inputStyle}
-              >
-                <option value="">{attr.name}: —</option>
-                {attr.product_attribute_value.map((val) => (
-                  <option key={val.id} value={val.id}>
-                    {attr.name}: {val.name}
-                  </option>
+            <SectionLabel>Varian</SectionLabel>
+            {variants.map((v, i) => (
+              <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                <Input placeholder="SKU" value={v.sku} onChange={(e) => updateVariant(i, { sku: e.target.value })} style={{ width: 140 }} />
+                <Input
+                  placeholder="Barcode (opsional)"
+                  value={v.barcode}
+                  onChange={(e) => updateVariant(i, { barcode: e.target.value })}
+                  style={{ width: 160 }}
+                />
+                {attributes.map((attr) => (
+                  <Select key={attr.id} value={v.values[attr.id] ?? ''} onChange={(e) => updateVariantValue(i, attr.id, e.target.value)}>
+                    <option value="">{attr.name}: —</option>
+                    {attr.product_attribute_value.map((val) => (
+                      <option key={val.id} value={val.id}>
+                        {attr.name}: {val.name}
+                      </option>
+                    ))}
+                  </Select>
                 ))}
-              </select>
+                <Button variant="secondary" onClick={() => setVariants((rows) => rows.filter((_, idx) => idx !== i))} disabled={variants.length === 1}>
+                  Hapus
+                </Button>
+              </div>
             ))}
-            <button
-              type="button"
-              onClick={() => setVariants((rows) => rows.filter((_, idx) => idx !== i))}
-              disabled={variants.length === 1}
-            >
-              Hapus
-            </button>
-          </div>
-        ))}
-        <button type="button" onClick={() => setVariants((rows) => [...rows, emptyVariant()])} style={{ alignSelf: 'flex-start' }}>
-          + Tambah baris varian
-        </button>
+            <Button variant="secondary" onClick={() => setVariants((rows) => [...rows, emptyVariant()])} style={{ alignSelf: 'flex-start' }}>
+              + Tambah baris varian
+            </Button>
 
-        <div>
-          <button type="submit" disabled={saving} style={{ padding: '10px 18px', background: '#1F6F4A', color: '#fff', border: 0, borderRadius: 6 }}>
-            {saving ? 'Menyimpan…' : 'Simpan produk'}
-          </button>
-        </div>
-        {error && <p style={{ color: '#C8362A' }}>{error}</p>}
-      </form>
-    </main>
+            <div>
+              <Button type="submit" variant="accent" disabled={saving} style={{ padding: '11px 18px', fontSize: 13.5 }}>
+                {saving ? 'Menyimpan…' : 'Simpan produk'}
+              </Button>
+            </div>
+            {error && <ErrorText>{error}</ErrorText>}
+          </form>
+        </Card>
+      </PageBody>
+    </PageShell>
   )
 }
-
-const inputStyle: React.CSSProperties = { display: 'block', width: '100%', padding: 8, marginTop: 4, boxSizing: 'border-box' }

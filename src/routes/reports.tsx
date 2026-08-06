@@ -7,6 +7,8 @@ import {
   getStockCard,
   listVariantsForReport,
 } from '#/server/reports'
+import { Badge, Button, Card, ErrorText, PageBody, PageHeader, PageShell, SectionLabel, Select, table } from '#/components/ui'
+import { color, font } from '#/lib/theme'
 
 export const Route = createFileRoute('/reports')({
   component: Reports,
@@ -47,162 +49,173 @@ function Reports() {
   }
 
   return (
-    <main style={{ fontFamily: 'system-ui, sans-serif', padding: 24, maxWidth: 1000 }}>
-      <h1>Laporan</h1>
+    <PageShell>
+      <PageHeader title="Laporan" />
+      <PageBody maxWidth={1100}>
+        <SectionLabel>Kartu Stok</SectionLabel>
+        <Card>
+          <form onSubmit={onShowCard} style={{ display: 'flex', gap: 8, alignItems: 'center', padding: 16, borderBottom: card ? `1px solid ${color.divider}` : 0 }}>
+            <Select value={variantId} onChange={(e) => setVariantId(e.target.value)} style={{ flex: 1, maxWidth: 360 }}>
+              {variants.map((v) => (
+                <option key={v.id} value={v.id}>
+                  {v.template.name} ({v.sku})
+                </option>
+              ))}
+            </Select>
+            <Button type="submit" variant="secondary" disabled={loadingCard}>
+              {loadingCard ? 'Memuat…' : 'Tampilkan'}
+            </Button>
+          </form>
+          {card && (
+            <div style={table.wrap}>
+              <table style={table.table}>
+                <thead>
+                  <tr>
+                    <th style={table.th}>Tanggal</th>
+                    <th style={table.th}>Referensi</th>
+                    <th style={table.th}>Dari</th>
+                    <th style={table.th}>Ke</th>
+                    <th style={{ ...table.th, ...table.thRight }}>Qty</th>
+                    <th style={{ ...table.th, ...table.thRight }}>Saldo Perusahaan</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {card.length === 0 && (
+                    <tr>
+                      <td colSpan={6} style={{ ...table.td, color: color.textMuted }}>
+                        Belum ada pergerakan untuk produk ini.
+                      </td>
+                    </tr>
+                  )}
+                  {card.map((row, i) => (
+                    <tr key={i}>
+                      <td style={{ ...table.td, ...table.tdMono, color: color.textMuted, fontSize: 12 }}>{new Date(row.happened_at).toLocaleString('id-ID')}</td>
+                      <td style={{ ...table.td, ...table.tdMono, fontWeight: 500 }}>{row.reference}</td>
+                      <td style={{ ...table.td, ...table.tdMono, color: color.textSubtle, fontSize: 12 }}>{row.src_name}</td>
+                      <td style={{ ...table.td, ...table.tdMono, color: color.textSubtle, fontSize: 12 }}>{row.dest_name}</td>
+                      <td style={{ ...table.td, ...table.tdRight, ...table.tdMono, fontWeight: 600 }}>{row.qty}</td>
+                      <td style={{ ...table.td, ...table.tdRight, ...table.tdMono, fontWeight: 600, color: color.text }}>{row.running_balance}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </Card>
+        {error && <ErrorText>{error}</ErrorText>}
 
-      <section style={{ marginTop: 24 }}>
-        <h2 style={{ fontSize: 18 }}>Kartu Stok</h2>
-        <form onSubmit={onShowCard} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <select value={variantId} onChange={(e) => setVariantId(e.target.value)} style={{ padding: 8, flex: 1, maxWidth: 360 }}>
-            {variants.map((v) => (
-              <option key={v.id} value={v.id}>
-                {v.template.name} ({v.sku})
-              </option>
-            ))}
-          </select>
-          <button type="submit" disabled={loadingCard}>
-            {loadingCard ? 'Memuat…' : 'Tampilkan'}
-          </button>
-        </form>
-        {error && <p style={{ color: '#C8362A' }}>{error}</p>}
-        {card && (
-          <div style={{ overflowX: 'auto', marginTop: 12 }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
+        <SectionLabel>Penjualan per Toko</SectionLabel>
+        <Card>
+          <div style={table.wrap}>
+            <table style={table.table}>
               <thead>
-                <tr style={{ textAlign: 'left', borderBottom: '1px solid #ccc' }}>
-                  <th style={{ padding: 6 }}>Tanggal</th>
-                  <th style={{ padding: 6 }}>Referensi</th>
-                  <th style={{ padding: 6 }}>Dari</th>
-                  <th style={{ padding: 6 }}>Ke</th>
-                  <th style={{ padding: 6, textAlign: 'right' }}>Qty</th>
-                  <th style={{ padding: 6, textAlign: 'right' }}>Saldo Perusahaan</th>
+                <tr>
+                  <th style={table.th}>Toko</th>
+                  <th style={{ ...table.th, ...table.thRight }}>Jumlah Struk</th>
+                  <th style={{ ...table.th, ...table.thRight }}>Qty Terjual</th>
+                  <th style={{ ...table.th, ...table.thRight }}>Pendapatan</th>
                 </tr>
               </thead>
               <tbody>
-                {card.length === 0 && (
+                {sales.length === 0 && (
                   <tr>
-                    <td colSpan={6} style={{ padding: 6, color: '#888' }}>
-                      Belum ada pergerakan untuk produk ini.
+                    <td colSpan={4} style={{ ...table.td, color: color.textMuted }}>
+                      Belum ada penjualan.
                     </td>
                   </tr>
                 )}
-                {card.map((row, i) => (
-                  <tr key={i} style={{ borderBottom: '1px solid #eee' }}>
-                    <td style={{ padding: 6 }}>{new Date(row.happened_at).toLocaleString('id-ID')}</td>
-                    <td style={{ padding: 6 }}>{row.reference}</td>
-                    <td style={{ padding: 6 }}>{row.src_name}</td>
-                    <td style={{ padding: 6 }}>{row.dest_name}</td>
-                    <td style={{ padding: 6, textAlign: 'right' }}>{row.qty}</td>
-                    <td style={{ padding: 6, textAlign: 'right', fontWeight: 600 }}>{row.running_balance}</td>
+                {sales.map((s) => (
+                  <tr key={s.warehouse_id}>
+                    <td style={table.td}>
+                      {s.warehouse_code} — {s.warehouse_name}
+                    </td>
+                    <td style={{ ...table.td, ...table.tdRight, ...table.tdMono }}>{s.order_count}</td>
+                    <td style={{ ...table.td, ...table.tdRight, ...table.tdMono }}>{s.qty_sold}</td>
+                    <td style={{ ...table.td, ...table.tdRight, ...table.tdMono, fontWeight: 600 }}>{money(s.revenue)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-        )}
-      </section>
+        </Card>
 
-      <section style={{ marginTop: 32 }}>
-        <h2 style={{ fontSize: 18 }}>Penjualan per Toko</h2>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14, marginTop: 8 }}>
-          <thead>
-            <tr style={{ textAlign: 'left', borderBottom: '1px solid #ccc' }}>
-              <th style={{ padding: 6 }}>Toko</th>
-              <th style={{ padding: 6, textAlign: 'right' }}>Jumlah Struk</th>
-              <th style={{ padding: 6, textAlign: 'right' }}>Qty Terjual</th>
-              <th style={{ padding: 6, textAlign: 'right' }}>Pendapatan</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sales.length === 0 && (
-              <tr>
-                <td colSpan={4} style={{ padding: 6, color: '#888' }}>
-                  Belum ada penjualan.
-                </td>
-              </tr>
-            )}
-            {sales.map((s) => (
-              <tr key={s.warehouse_id} style={{ borderBottom: '1px solid #eee' }}>
-                <td style={{ padding: 6 }}>
-                  {s.warehouse_code} — {s.warehouse_name}
-                </td>
-                <td style={{ padding: 6, textAlign: 'right' }}>{s.order_count}</td>
-                <td style={{ padding: 6, textAlign: 'right' }}>{s.qty_sold}</td>
-                <td style={{ padding: 6, textAlign: 'right' }}>{money(s.revenue)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
+        <SectionLabel>Nilai Persediaan</SectionLabel>
+        <Card>
+          <div style={table.wrap}>
+            <table style={table.table}>
+              <thead>
+                <tr>
+                  <th style={table.th}>Produk</th>
+                  <th style={{ ...table.th, ...table.thRight }}>Qty di Tangan</th>
+                  <th style={{ ...table.th, ...table.thRight }}>Harga Pokok</th>
+                  <th style={{ ...table.th, ...table.thRight }}>Total Nilai</th>
+                </tr>
+              </thead>
+              <tbody>
+                {inventory.rows.map((r) => (
+                  <tr key={r.variant_id}>
+                    <td style={table.td}>
+                      {r.product_name} ({r.sku})
+                    </td>
+                    <td style={{ ...table.td, ...table.tdRight, ...table.tdMono }}>{r.qty_on_hand}</td>
+                    <td style={{ ...table.td, ...table.tdRight, ...table.tdMono }}>{money(r.cost_price)}</td>
+                    <td style={{ ...table.td, ...table.tdRight, ...table.tdMono }}>{money(r.total_value)}</td>
+                  </tr>
+                ))}
+                <tr>
+                  <td style={{ ...table.td, borderTop: `2px solid ${color.textStrong}`, borderBottom: 0, font: `600 13px/1 ${font.sans}` }} colSpan={3}>
+                    Total nilai persediaan
+                  </td>
+                  <td style={{ ...table.td, ...table.tdRight, ...table.tdMono, borderTop: `2px solid ${color.textStrong}`, borderBottom: 0, fontWeight: 700 }}>
+                    {money(inventory.total)}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </Card>
 
-      <section style={{ marginTop: 32 }}>
-        <h2 style={{ fontSize: 18 }}>Nilai Persediaan</h2>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14, marginTop: 8 }}>
-          <thead>
-            <tr style={{ textAlign: 'left', borderBottom: '1px solid #ccc' }}>
-              <th style={{ padding: 6 }}>Produk</th>
-              <th style={{ padding: 6, textAlign: 'right' }}>Qty di Tangan</th>
-              <th style={{ padding: 6, textAlign: 'right' }}>Harga Pokok</th>
-              <th style={{ padding: 6, textAlign: 'right' }}>Total Nilai</th>
-            </tr>
-          </thead>
-          <tbody>
-            {inventory.rows.map((r) => (
-              <tr key={r.variant_id} style={{ borderBottom: '1px solid #eee' }}>
-                <td style={{ padding: 6 }}>
-                  {r.product_name} ({r.sku})
-                </td>
-                <td style={{ padding: 6, textAlign: 'right' }}>{r.qty_on_hand}</td>
-                <td style={{ padding: 6, textAlign: 'right' }}>{money(r.cost_price)}</td>
-                <td style={{ padding: 6, textAlign: 'right' }}>{money(r.total_value)}</td>
-              </tr>
-            ))}
-            <tr style={{ fontWeight: 700, borderTop: '2px solid #333' }}>
-              <td style={{ padding: 6 }} colSpan={3}>
-                Total nilai persediaan
-              </td>
-              <td style={{ padding: 6, textAlign: 'right' }}>{money(inventory.total)}</td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
-
-      <section style={{ marginTop: 32, marginBottom: 40 }}>
-        <h2 style={{ fontSize: 18 }}>Produk di Bawah Titik Minimum — Usulan Pesan Ulang</h2>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14, marginTop: 8 }}>
-          <thead>
-            <tr style={{ textAlign: 'left', borderBottom: '1px solid #ccc' }}>
-              <th style={{ padding: 6 }}>Lokasi</th>
-              <th style={{ padding: 6 }}>Produk</th>
-              <th style={{ padding: 6, textAlign: 'right' }}>Stok</th>
-              <th style={{ padding: 6, textAlign: 'right' }}>Titik Minimum</th>
-              <th style={{ padding: 6 }}>Usulan</th>
-            </tr>
-          </thead>
-          <tbody>
-            {reorder.length === 0 && (
-              <tr>
-                <td colSpan={5} style={{ padding: 6, color: '#1F6F4A' }}>
-                  Semua produk masih di atas titik minimum.
-                </td>
-              </tr>
-            )}
-            {reorder.map((r, i) => (
-              <tr key={i} style={{ borderBottom: '1px solid #eee' }}>
-                <td style={{ padding: 6 }}>
-                  {r.warehouse_code} — {r.warehouse_name}
-                </td>
-                <td style={{ padding: 6 }}>
-                  {r.product_name} ({r.sku})
-                </td>
-                <td style={{ padding: 6, textAlign: 'right', color: '#C8362A' }}>{r.qty_on_hand}</td>
-                <td style={{ padding: 6, textAlign: 'right' }}>{r.reorder_point}</td>
-                <td style={{ padding: 6, fontWeight: 600 }}>{r.suggestion}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
-    </main>
+        <SectionLabel>Produk di Bawah Titik Minimum — Usulan Pesan Ulang</SectionLabel>
+        <Card>
+          <div style={table.wrap}>
+            <table style={table.table}>
+              <thead>
+                <tr>
+                  <th style={table.th}>Lokasi</th>
+                  <th style={table.th}>Produk</th>
+                  <th style={{ ...table.th, ...table.thRight }}>Stok</th>
+                  <th style={{ ...table.th, ...table.thRight }}>Titik Minimum</th>
+                  <th style={table.th}>Usulan</th>
+                </tr>
+              </thead>
+              <tbody>
+                {reorder.length === 0 && (
+                  <tr>
+                    <td colSpan={5} style={{ ...table.td, color: color.brandGreen }}>
+                      Semua produk masih di atas titik minimum.
+                    </td>
+                  </tr>
+                )}
+                {reorder.map((r, i) => (
+                  <tr key={i}>
+                    <td style={table.td}>
+                      {r.warehouse_code} — {r.warehouse_name}
+                    </td>
+                    <td style={table.td}>
+                      {r.product_name} ({r.sku})
+                    </td>
+                    <td style={{ ...table.td, ...table.tdRight, ...table.tdMono, color: color.brandRed, fontWeight: 600 }}>{r.qty_on_hand}</td>
+                    <td style={{ ...table.td, ...table.tdRight, ...table.tdMono, color: color.textMuted }}>{r.reorder_point}</td>
+                    <td style={table.td}>
+                      <Badge tone={r.suggestion === 'Transfer dari Gudang Pusat' ? 'success' : 'warn'}>{r.suggestion}</Badge>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      </PageBody>
+    </PageShell>
   )
 }

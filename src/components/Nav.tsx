@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router'
+import { color, font } from '#/lib/theme'
 
 const links = [
   { to: '/', label: 'Beranda' },
@@ -21,32 +22,50 @@ export function Nav() {
     <nav
       style={{
         display: 'flex',
-        gap: 4,
+        alignItems: 'center',
+        gap: 14,
         padding: '0 16px',
         height: 46,
-        alignItems: 'center',
-        background: '#16211C',
-        borderBottom: '1px solid #22302A',
+        background: color.navBg,
+        borderBottom: `1px solid ${color.navBorder}`,
+        position: 'sticky',
+        top: 0,
+        zIndex: 60,
       }}
     >
-      {links.map((l) => (
-        <Link
-          key={l.to}
-          to={l.to}
-          activeOptions={{ exact: l.to === '/' }}
-          style={{
-            border: 0,
-            borderRadius: 6,
-            padding: '6px 11px',
-            font: '500 12.5px/1 system-ui, sans-serif',
-            color: 'rgba(255,255,255,.82)',
-            textDecoration: 'none',
-          }}
-          activeProps={{ style: { background: 'rgba(255,255,255,.14)', color: '#fff' } }}
-        >
-          {l.label}
-        </Link>
-      ))}
+      <span
+        style={{
+          font: `600 11px/1 ${font.mono}`,
+          letterSpacing: '.14em',
+          color: color.navLabel,
+          textTransform: 'uppercase',
+          flex: 'none',
+        }}
+      >
+        Consina ERP
+      </span>
+      <div style={{ display: 'flex', gap: 4, overflowX: 'auto' }}>
+        {links.map((l) => (
+          <Link
+            key={l.to}
+            to={l.to}
+            activeOptions={{ exact: l.to === '/' }}
+            style={{
+              flex: 'none',
+              border: 0,
+              borderRadius: 6,
+              padding: '6px 11px',
+              font: `500 12.5px/1 ${font.sans}`,
+              color: color.navInactiveFg,
+              background: color.navInactiveBg,
+              textDecoration: 'none',
+            }}
+            activeProps={{ style: { background: color.brandRed, color: '#fff' } }}
+          >
+            {l.label}
+          </Link>
+        ))}
+      </div>
     </nav>
   )
 }

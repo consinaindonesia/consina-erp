@@ -1,6 +1,7 @@
 import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { useState } from 'react'
 import { createCategory, listCategories } from '#/server/catalog'
+import { Button, Card, ErrorText, Input, PageBody, PageHeader, PageShell, table } from '#/components/ui'
 
 export const Route = createFileRoute('/categories')({
   component: Categories,
@@ -30,26 +31,30 @@ function Categories() {
   }
 
   return (
-    <main style={{ fontFamily: 'system-ui, sans-serif', padding: 24, maxWidth: 480 }}>
-      <h1>Kategori Produk</h1>
-      <ul>
-        {categories.map((c) => (
-          <li key={c.id}>{c.name}</li>
-        ))}
-      </ul>
-      <form onSubmit={onSubmit} style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-        <input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Nama kategori baru"
-          required
-          style={{ flex: 1, padding: 8 }}
-        />
-        <button type="submit" disabled={saving}>
-          {saving ? 'Menyimpan…' : 'Tambah'}
-        </button>
-      </form>
-      {error && <p style={{ color: '#C8362A' }}>{error}</p>}
-    </main>
+    <PageShell>
+      <PageHeader title="Kategori Produk" />
+      <PageBody maxWidth={560}>
+        <Card>
+          <div style={table.wrap}>
+            <table style={table.table}>
+              <tbody>
+                {categories.map((c) => (
+                  <tr key={c.id}>
+                    <td style={table.td}>{c.name}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+        <form onSubmit={onSubmit} style={{ display: 'flex', gap: 8 }}>
+          <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nama kategori baru" required style={{ flex: 1 }} />
+          <Button type="submit" variant="accent" disabled={saving}>
+            {saving ? 'Menyimpan…' : 'Tambah'}
+          </Button>
+        </form>
+        {error && <ErrorText>{error}</ErrorText>}
+      </PageBody>
+    </PageShell>
   )
 }

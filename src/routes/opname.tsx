@@ -2,6 +2,8 @@ import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { listLocations } from '#/server/locations'
 import { listStockForLocation, submitOpname } from '#/server/stock'
+import { Button, Card, ErrorText, Input, Label, PageBody, PageHeader, PageShell, Select, SuccessText, table } from '#/components/ui'
+import { color, font } from '#/lib/theme'
 
 export const Route = createFileRoute('/opname')({
   component: Opname,
@@ -59,75 +61,78 @@ function Opname() {
   }
 
   return (
-    <main style={{ fontFamily: 'system-ui, sans-serif', padding: 24, maxWidth: 700 }}>
-      <h1>Stock Opname</h1>
-      <p style={{ color: '#5A6661', fontSize: 13.5 }}>
-        Bandingkan angka di layar dengan hitungan fisik. Isi angka fisik sungguhan — sistem yang menghitung selisihnya.
-      </p>
+    <PageShell>
+      <PageHeader title="Stock Opname" />
+      <PageBody maxWidth={760}>
+        <p style={{ font: `400 13px/1.5 ${font.sans}`, color: color.textSubtle, margin: 0 }}>
+          Bandingkan angka di layar dengan hitungan fisik. Isi angka fisik sungguhan — sistem yang menghitung selisihnya.
+        </p>
 
-      <label>
-        Lokasi
-        <select value={locationId} onChange={(e) => setLocationId(e.target.value)} style={{ display: 'block', width: '100%', padding: 8, marginTop: 4, marginBottom: 16 }}>
-          {locations.map((l) => (
-            <option key={l.id} value={l.id}>
-              {l.code} — {l.name}
-            </option>
-          ))}
-        </select>
-      </label>
+        <Label>
+          Lokasi
+          <Select value={locationId} onChange={(e) => setLocationId(e.target.value)} style={{ maxWidth: 360 }}>
+            {locations.map((l) => (
+              <option key={l.id} value={l.id}>
+                {l.code} — {l.name}
+              </option>
+            ))}
+          </Select>
+        </Label>
 
-      {loading && <p>Memuat…</p>}
+        {loading && <p style={{ font: `400 13px/1 ${font.sans}`, color: color.textMuted }}>Memuat…</p>}
 
-      {!loading && (
-        <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <table style={{ borderCollapse: 'collapse', width: '100%' }}>
-            <thead>
-              <tr>
-                <th style={th}>Produk</th>
-                <th style={th}>Sistem</th>
-                <th style={th}>Fisik</th>
-              </tr>
-            </thead>
-            <tbody>
-              {stock.map((r) => (
-                <tr key={r.variant_id}>
-                  <td style={td}>
-                    {r.variant?.template?.name} ({r.variant?.sku})
-                  </td>
-                  <td style={td}>{r.quantity}</td>
-                  <td style={td}>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={counts[r.variant_id] ?? ''}
-                      onChange={(e) => setCounts((c) => ({ ...c, [r.variant_id]: e.target.value }))}
-                      style={{ width: 100, padding: 6 }}
-                    />
-                  </td>
-                </tr>
-              ))}
-              {stock.length === 0 && (
-                <tr>
-                  <td style={td} colSpan={3}>
-                    Tidak ada stok tercatat di lokasi ini.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-          <div>
-            <button type="submit" disabled={saving || stock.length === 0} style={{ padding: '10px 18px', background: '#1F6F4A', color: '#fff', border: 0, borderRadius: 6 }}>
-              {saving ? 'Menyimpan…' : 'Simpan opname'}
-            </button>
-          </div>
-          {done && <p style={{ color: '#1F6F4A' }}>{done}</p>}
-          {error && <p style={{ color: '#C8362A' }}>{error}</p>}
-        </form>
-      )}
-    </main>
+        {!loading && (
+          <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <Card>
+              <div style={table.wrap}>
+                <table style={table.table}>
+                  <thead>
+                    <tr>
+                      <th style={table.th}>Produk</th>
+                      <th style={{ ...table.th, ...table.thRight }}>Sistem</th>
+                      <th style={{ ...table.th, ...table.thRight }}>Fisik</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {stock.map((r) => (
+                      <tr key={r.variant_id}>
+                        <td style={table.td}>
+                          {r.variant?.template?.name} ({r.variant?.sku})
+                        </td>
+                        <td style={{ ...table.td, ...table.tdRight, ...table.tdMono }}>{r.quantity}</td>
+                        <td style={{ ...table.td, ...table.tdRight }}>
+                          <Input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={counts[r.variant_id] ?? ''}
+                            onChange={(e) => setCounts((c) => ({ ...c, [r.variant_id]: e.target.value }))}
+                            style={{ width: 100, textAlign: 'right' }}
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                    {stock.length === 0 && (
+                      <tr>
+                        <td style={table.td} colSpan={3}>
+                          Tidak ada stok tercatat di lokasi ini.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+            <div>
+              <Button type="submit" variant="accent" disabled={saving || stock.length === 0} style={{ padding: '11px 18px', fontSize: 13.5 }}>
+                {saving ? 'Menyimpan…' : 'Simpan opname'}
+              </Button>
+            </div>
+            {done && <SuccessText>{done}</SuccessText>}
+            {error && <ErrorText>{error}</ErrorText>}
+          </form>
+        )}
+      </PageBody>
+    </PageShell>
   )
 }
-
-const th: React.CSSProperties = { textAlign: 'left', borderBottom: '1px solid #E0E5E3', padding: 6, fontSize: 12.5 }
-const td: React.CSSProperties = { borderBottom: '1px solid #F0F3F1', padding: 6, fontSize: 13.5 }

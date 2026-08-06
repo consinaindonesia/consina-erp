@@ -1,6 +1,7 @@
 import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { useState } from 'react'
 import { createAttribute, createAttributeValue, listAttributes } from '#/server/catalog'
+import { Badge, Button, Card, CardBody, ErrorText, Input, PageBody, PageHeader, PageShell, Title } from '#/components/ui'
 
 export const Route = createFileRoute('/attributes')({
   component: Attributes,
@@ -30,28 +31,27 @@ function Attributes() {
   }
 
   return (
-    <main style={{ fontFamily: 'system-ui, sans-serif', padding: 24, maxWidth: 640 }}>
-      <h1>Atribut Varian (mis. WARNA, UKURAN)</h1>
+    <PageShell>
+      <PageHeader title="Atribut Varian" />
+      <PageBody maxWidth={720}>
+        {attributes.map((attr) => (
+          <AttributeCard key={attr.id} attribute={attr} onChanged={() => router.invalidate()} />
+        ))}
 
-      {attributes.map((attr) => (
-        <AttributeCard key={attr.id} attribute={attr} onChanged={() => router.invalidate()} />
-      ))}
-
-      <h2 style={{ fontSize: 16, marginTop: 24 }}>Tambah atribut baru</h2>
-      <form onSubmit={onAddAttribute} style={{ display: 'flex', gap: 8 }}>
-        <input
-          value={newAttrName}
-          onChange={(e) => setNewAttrName(e.target.value)}
-          placeholder="mis. UKURAN"
-          required
-          style={{ flex: 1, padding: 8 }}
-        />
-        <button type="submit" disabled={saving}>
-          {saving ? 'Menyimpan…' : 'Tambah'}
-        </button>
-      </form>
-      {error && <p style={{ color: '#C8362A' }}>{error}</p>}
-    </main>
+        <Card>
+          <CardBody style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <Title>Tambah atribut baru</Title>
+            <form onSubmit={onAddAttribute} style={{ display: 'flex', gap: 8 }}>
+              <Input value={newAttrName} onChange={(e) => setNewAttrName(e.target.value)} placeholder="mis. UKURAN" required style={{ flex: 1 }} />
+              <Button type="submit" variant="accent" disabled={saving}>
+                {saving ? 'Menyimpan…' : 'Tambah'}
+              </Button>
+            </form>
+            {error && <ErrorText>{error}</ErrorText>}
+          </CardBody>
+        </Card>
+      </PageBody>
+    </PageShell>
   )
 }
 
@@ -84,23 +84,25 @@ function AttributeCard({
   }
 
   return (
-    <div style={{ border: '1px solid #E0E5E3', borderRadius: 8, padding: 14, marginBottom: 12 }}>
-      <strong>{attribute.name}</strong>
-      <ul>
-        {attribute.product_attribute_value.map((v) => (
-          <li key={v.id}>
-            {v.name} ({v.code})
-          </li>
-        ))}
-      </ul>
-      <form onSubmit={onSubmit} style={{ display: 'flex', gap: 8 }}>
-        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nama (mis. Merah)" required style={{ padding: 6 }} />
-        <input value={code} onChange={(e) => setCode(e.target.value)} placeholder="Kode (mis. RD)" required style={{ width: 90, padding: 6 }} />
-        <button type="submit" disabled={saving}>
-          {saving ? '…' : 'Tambah nilai'}
-        </button>
-      </form>
-      {error && <p style={{ color: '#C8362A' }}>{error}</p>}
-    </div>
+    <Card>
+      <CardBody style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <Title>{attribute.name}</Title>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          {attribute.product_attribute_value.map((v) => (
+            <Badge key={v.id}>
+              {v.name} ({v.code})
+            </Badge>
+          ))}
+        </div>
+        <form onSubmit={onSubmit} style={{ display: 'flex', gap: 8 }}>
+          <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nama (mis. Merah)" required style={{ flex: 1 }} />
+          <Input value={code} onChange={(e) => setCode(e.target.value)} placeholder="Kode (mis. RD)" required style={{ width: 90 }} />
+          <Button type="submit" variant="secondary" disabled={saving}>
+            {saving ? '…' : 'Tambah nilai'}
+          </Button>
+        </form>
+        {error && <ErrorText>{error}</ErrorText>}
+      </CardBody>
+    </Card>
   )
 }

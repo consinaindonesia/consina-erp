@@ -1,6 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
+import { Badge, Card, CardBody, PageBody, PageShell } from '#/components/ui'
 import { supabase } from '#/lib/supabase'
+import { font } from '#/lib/theme'
 
 const checkSupabase = createServerFn({ method: 'GET' }).handler(async () => {
   if (!supabase) return { ok: false, message: 'VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY belum diatur' }
@@ -17,15 +19,19 @@ function Home() {
   const supabaseStatus = Route.useLoaderData()
 
   return (
-    <main style={{ fontFamily: 'system-ui, sans-serif', padding: 24 }}>
-      <h1>Consina ERP</h1>
-      <p>
-        Status Supabase:{' '}
-        <strong style={{ color: supabaseStatus.ok ? '#1F6F4A' : '#C8362A' }}>
-          {supabaseStatus.ok ? '✓ Terhubung' : `✗ ${supabaseStatus.message}`}
-        </strong>
-      </p>
-      <p>Gunakan menu di atas untuk kelola produk, kategori, satuan, atribut, dan lokasi.</p>
-    </main>
+    <PageShell>
+      <PageBody maxWidth={640}>
+        <h1 style={{ font: `600 24px/1.2 ${font.sans}`, margin: 0 }}>Consina ERP</h1>
+        <Card>
+          <CardBody style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ font: `500 13.5px/1 ${font.sans}` }}>Status Supabase</span>
+            <Badge tone={supabaseStatus.ok ? 'success' : 'danger'}>{supabaseStatus.ok ? 'Terhubung' : supabaseStatus.message}</Badge>
+          </CardBody>
+        </Card>
+        <p style={{ font: `400 13.5px/1.6 ${font.sans}`, color: '#5A6661' }}>
+          Gunakan menu di atas untuk kelola produk, kategori, satuan, atribut, lokasi, persediaan, kasir, produksi, dan laporan.
+        </p>
+      </PageBody>
+    </PageShell>
   )
 }
