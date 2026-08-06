@@ -489,3 +489,60 @@ disamakan, semua halaman sekaligus.
     data), tapi test suite tetap dijalankan ulang untuk pastikan
     tidak ada regresi fungsional dari refactor JSX-nya, dan semuanya
     tetap hijau (12/12 lulus).
+
+## Koreksi tema: gelap, warna & font Odoo ASLI (2026-08-06, sesi sama)
+
+Setelah restyle di atas, pemilik menunjukkan Odoo asli PT Consina
+sungguhan (`dev.consina.cloud/odoo`, dibuka lewat Chrome yang sudah
+login) dan bilang tampilannya masih belum mirip. Warna & font di
+`ERP Retail Mockup.dc.html` ternyata BUKAN warna/font Odoo asli —
+itu cuma interpretasi desainer mockup. Diverifikasi langsung dari
+computed style elemen sungguhan di instance itu (subscription-nya
+expired jadi isi list/kanban tidak bisa dibuka, tapi chrome navbar-
+nya kebaca):
+
+- navbar: `rgb(13,108,52)` = `#0D6C34` (hijau cerah, BUKAN hijau
+  nyaris-hitam dari mockup)
+- teks di navbar: `rgb(228,228,228)` = `#E4E4E4`
+- latar konten (mode gelap Odoo): `rgb(27,29,38)` = `#1B1D26`
+  — pemilik pakai Odoo dalam mode gelap sehari-hari, jadi diminta
+  ikut gelap juga di aplikasi ini
+- pill menu di navbar: `rgb(38,42,54)` = `#262A36`, radius 4px
+- font-family: `-apple-system, system-ui, "Segoe UI", Roboto, ...`
+  — font sistem biasa, BUKAN IBM Plex. Odoo tidak punya font angka
+  terpisah (satu font-family di semua tempat).
+
+**Perubahan** (semuanya cukup di `src/lib/theme.ts` +
+`src/components/ui.tsx` karena sistem primitif sudah dipusatkan
+sejak restyle sebelumnya — tidak perlu sentuh ulang 14 file route,
+kecuali beberapa warna literal `#fff` di `pos.tsx` yang belum lewat
+token):
+- Semua token warna diganti ke versi gelap: kanvas & kartu jadi
+  gelap (`#1B1D26` / `#242733`), teks jadi terang (`#E4E4E4`),
+  badge status pakai latar transparan tipis + teks terang (bukan
+  pastel terang ala mockup, yang akan tenggelam di kanvas gelap).
+- `font.mono` diarahkan ke font sistem yang sama dengan `font.sans`
+  (bukan dihapus dari kode — supaya semua pemakaian `font.mono` di
+  seluruh halaman otomatis ikut, tanpa perlu sunting satu-satu).
+  Efeknya: tidak ada lagi font angka terpisah, sama seperti Odoo.
+- Radius diperkecil (4-8px, dari sebelumnya 5-11px) — Odoo asli
+  pill menu-nya cuma radius 4px.
+- **Bar judul per halaman (`PageHeader`) sengaja DIUBAH jadi netral
+  gelap, BUKAN hijau lagi** — di Odoo asli cuma ada SATU bar
+  berwarna (navbar atas), area breadcrumb di bawahnya polos. Bar
+  hijau kedua ala mockup dihapus supaya tidak ada dua bar hijau
+  bertumpuk yang tidak match struktur Odoo asli.
+- Bar sesi Kasir (`pos.tsx`) TETAP hijau — itu status bar
+  sungguhan (nama toko + status sinkron + tombol tutup sesi), bukan
+  judul halaman biasa, jadi wajar tetap jadi aksen warna.
+- Tab aktif di navigasi (`Nav.tsx`) diganti dari merah jadi pill
+  putih + teks hijau — Odoo tidak pakai merah untuk menandai
+  item aktif; merah dipertahankan cuma untuk aksi berbahaya/error.
+- Google Fonts IBM Plex dilepas dari `src/routes/__root.tsx` —
+  tidak dipakai lagi.
+- Sama seperti sebelumnya: murni tampilan, tidak ada perubahan
+  skema/RPC. Test suite dijalankan ulang, tetap hijau (satu test
+  M6 sempat timeout 5 detik saat dijalankan bareng seluruh suite —
+  dicoba ulang sendirian dan lulus dalam 6,4 detik; ini soal beban
+  jaringan/DB shared saat sesi tes berbarengan, bukan regresi dari
+  perubahan tampilan).

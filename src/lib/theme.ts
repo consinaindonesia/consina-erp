@@ -1,63 +1,81 @@
-// Token warna & font diambil persis dari mockup desain asli proyek ini
-// ("ERP Retail Mockup.dc.html") supaya tampilan aplikasi sungguhan sama
-// dengan yang sudah disetujui, bukan tebak-tebakan warna.
+// Token warna & font diambil dari instance Odoo sungguhan milik Consina
+// (dev.consina.cloud/odoo, mode gelap) via computed style, BUKAN dari
+// mockup desain lagi — mockup pakai font & warna yang ternyata beda dari
+// Odoo asli (IBM Plex vs system font, hijau nyaris-hitam vs hijau cerah).
+// Contoh nilai asli yang disampel: navbar rgb(13,108,52), teks
+// rgb(228,228,228), latar konten rgb(27,29,38), pill menu rgb(38,42,54)
+// radius 4px, font-family system-ui/-apple-system.
 
 export const font = {
-  sans: "'IBM Plex Sans', system-ui, sans-serif",
-  mono: "'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace",
+  sans: "-apple-system, system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', Ubuntu, sans-serif",
+  // Odoo tidak punya font angka terpisah — satu font-family di semua
+  // tempat. Token ini dipertahankan (bukan dihapus) supaya semua
+  // pemakaian `font.mono` di seluruh halaman otomatis ikut berubah
+  // tanpa perlu menyunting satu-satu.
+  mono: "-apple-system, system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', Ubuntu, sans-serif",
 }
 
 export const color = {
-  // Kanvas luar & bar navigasi (hijau tua nyaris hitam)
-  navBg: '#0E1512',
-  navBorder: '#22302A',
-  navLabel: '#7E8D87',
-  navInactiveBg: '#1A241F',
-  navInactiveFg: '#9BA8A2',
+  // Bar navigasi global (hijau Odoo asli)
+  navBg: '#0D6C34',
+  navBorder: 'rgba(0,0,0,.2)',
+  navLabel: 'rgba(255,255,255,.72)',
+  navInactiveBg: '#262A36',
+  navInactiveFg: '#E4E4E4',
+  navActiveBg: '#fff',
+  navActiveFg: '#0D6C34',
 
-  // Header dalam tiap halaman (sedikit lebih terang dari navBg)
-  headerBg: '#16211C',
+  // Bar judul per halaman — netral gelap, BUKAN bar hijau kedua (di
+  // Odoo asli area di bawah navbar tidak berwarna, cuma breadcrumb
+  // biasa di atas kanvas gelap).
+  pageHeaderBg: '#20232E',
+  pageHeaderBorder: 'rgba(255,255,255,.08)',
 
-  // Kanvas konten & kartu
-  panelBg: '#F4F6F5',
-  surface: '#fff',
-  border: '#E0E5E3',
-  borderStrong: '#D6DDDA',
-  divider: '#EBEFED',
-  dividerSoft: '#F2F5F3',
-  tableHeadBg: '#F8FAF9',
-  subtleBg: '#FAFCFB',
+  // Bar sesi Kasir — ini status bar sungguhan (bukan judul halaman),
+  // jadi tetap boleh berwarna hijau seperti navbar.
+  posBarBg: '#0D6C34',
 
-  // Teks
-  text: '#1B211E',
-  textStrong: '#16211C',
-  textSubtle: '#5A6661',
-  textMuted: '#84918B',
-  textFaint: '#A2ADA7',
+  // Kanvas konten & permukaan kartu (semua gelap)
+  panelBg: '#1B1D26',
+  surface: '#242733',
+  surfaceRaised: '#2A2E3B',
+  border: 'rgba(255,255,255,.09)',
+  borderStrong: 'rgba(255,255,255,.16)',
+  divider: 'rgba(255,255,255,.08)',
+  dividerSoft: 'rgba(255,255,255,.06)',
+  tableHeadBg: '#20232E',
+  subtleBg: '#20232E',
+
+  // Teks di atas kanvas gelap
+  text: '#E4E4E4',
+  textStrong: '#FFFFFF',
+  textSubtle: '#B4BAC7',
+  textMuted: '#8A90A0',
+  textFaint: '#5F6575',
 
   // Aksen
-  brandRed: '#C8362A',
-  brandGreen: '#1F6F4A',
-  brandGreenHover: '#185B3C',
-  brandDark: '#16211C',
+  brandRed: '#E5534B',
+  brandGreen: '#14804A',
+  brandGreenHover: '#0F6B3D',
+  brandDark: '#2A2E3B',
 
-  // Status
-  warnBg: '#FDF3DE',
-  warnFg: '#8a5c12',
-  warnBorder: '#EFDCAF',
-  successBg: '#EAF6EF',
-  successFg: '#175B3B',
-  successFgSoft: '#3E7A5B',
-  successBorder: '#BCE0CB',
-  dangerBg: '#FAD6D6',
-  dangerFg: '#8e2626',
-  dangerBorder: '#F09595',
+  // Status (latar transparan tipis + teks terang, cocok untuk kanvas gelap)
+  warnBg: 'rgba(245,166,35,.16)',
+  warnFg: '#F5A623',
+  warnBorder: 'rgba(245,166,35,.38)',
+  successBg: 'rgba(20,128,74,.22)',
+  successFg: '#4ADE80',
+  successFgSoft: '#7CD9A8',
+  successBorder: 'rgba(20,128,74,.45)',
+  dangerBg: 'rgba(229,83,75,.18)',
+  dangerFg: '#F87171',
+  dangerBorder: 'rgba(229,83,75,.4)',
 }
 
 export const radius = {
-  sm: 5,
-  md: 7,
-  lg: 9,
-  xl: 11,
-  pill: 20,
+  sm: 4,
+  md: 4,
+  lg: 6,
+  xl: 8,
+  pill: 16,
 }

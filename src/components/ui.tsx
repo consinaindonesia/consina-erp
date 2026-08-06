@@ -14,12 +14,13 @@ export function PageHeader({ title, tabs, right }: { title: string; tabs?: React
     <div
       style={{
         height: 48,
-        background: color.headerBg,
+        background: color.pageHeaderBg,
+        borderBottom: `1px solid ${color.pageHeaderBorder}`,
         display: 'flex',
         alignItems: 'center',
         gap: 22,
         padding: '0 18px',
-        color: '#fff',
+        color: color.textStrong,
       }}
     >
       <span style={{ font: `600 14.5px/1 ${font.sans}` }}>{title}</span>
@@ -153,6 +154,7 @@ export function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
         padding: '9px 12px',
         font: `400 14px/1 ${font.sans}`,
         color: color.text,
+        background: color.surface,
         outline: 'none',
         ...props.style,
       }}
@@ -170,7 +172,7 @@ export function Select(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
         padding: '9px 12px',
         font: `400 14px/1 ${font.sans}`,
         color: color.text,
-        background: '#fff',
+        background: color.surface,
         outline: 'none',
         ...props.style,
       }}
@@ -210,5 +212,5 @@ export function ErrorText({ children }: { children: ReactNode }) {
 }
 
 export function SuccessText({ children }: { children: ReactNode }) {
-  return <p style={{ color: color.brandGreen, font: `500 13px/1.4 ${font.sans}` }}>{children}</p>
+  return <p style={{ color: color.successFg, font: `500 13px/1.4 ${font.sans}` }}>{children}</p>
 }

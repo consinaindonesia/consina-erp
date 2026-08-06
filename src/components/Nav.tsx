@@ -53,14 +53,14 @@ export function Nav() {
             style={{
               flex: 'none',
               border: 0,
-              borderRadius: 6,
+              borderRadius: 4,
               padding: '6px 11px',
               font: `500 12.5px/1 ${font.sans}`,
               color: color.navInactiveFg,
               background: color.navInactiveBg,
               textDecoration: 'none',
             }}
-            activeProps={{ style: { background: color.brandRed, color: '#fff' } }}
+            activeProps={{ style: { background: color.navActiveBg, color: color.navActiveFg, fontWeight: 600 } }}
           >
             {l.label}
           </Link>

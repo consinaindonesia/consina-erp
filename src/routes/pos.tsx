@@ -249,7 +249,7 @@ function OpenSessionForm({
               <select
                 value={warehouseId}
                 onChange={(e) => setWarehouseId(e.target.value)}
-                style={{ border: `1px solid ${color.borderStrong}`, borderRadius: 7, padding: '9px 12px', font: `400 14px/1 ${font.sans}` }}
+                style={{ border: `1px solid ${color.borderStrong}`, borderRadius: 4, padding: '9px 12px', font: `400 14px/1 ${font.sans}`, background: color.surface, color: color.text }}
               >
                 {stores.map((w) => (
                   <option key={w.id} value={w.id}>
@@ -378,9 +378,9 @@ function PosScreen({
 
   return (
     <div style={{ height: 'calc(100vh - 46px)', display: 'flex', flexDirection: 'column', background: color.panelBg }}>
-      <div style={{ height: 56, flex: 'none', background: color.headerBg, display: 'flex', alignItems: 'center', padding: '0 18px', gap: 14, color: '#fff' }}>
+      <div style={{ height: 56, flex: 'none', background: color.posBarBg, display: 'flex', alignItems: 'center', padding: '0 18px', gap: 14, color: '#fff' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-          <div style={{ width: 26, height: 26, borderRadius: 7, background: color.brandRed, display: 'flex', alignItems: 'center', justifyContent: 'center', font: `700 12px/1 ${font.sans}` }}>C</div>
+          <div style={{ width: 26, height: 26, borderRadius: 4, background: color.brandRed, display: 'flex', alignItems: 'center', justifyContent: 'center', font: `700 12px/1 ${font.sans}` }}>C</div>
           <span style={{ font: `600 15px/1 ${font.sans}` }}>Kasir · {session.warehouse_code}</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 10px', borderRadius: 20, background: 'rgba(255,255,255,.12)', font: `500 11.5px/1 ${font.mono}` }}>
@@ -408,8 +408,8 @@ function PosScreen({
 
       <div style={{ flex: 1, display: 'flex', minHeight: 0 }}>
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, padding: '16px 16px 0' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#fff', border: `1px solid ${color.borderStrong}`, borderRadius: 9, padding: '0 14px', height: 52, flex: 'none', boxShadow: '0 1px 2px rgba(0,0,0,.04)' }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#84918B" strokeWidth="2.2" strokeLinecap="round">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: color.surface, border: `1px solid ${color.borderStrong}`, borderRadius: 6, padding: '0 14px', height: 52, flex: 'none' }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color.textMuted} strokeWidth="2.2" strokeLinecap="round">
               <circle cx="11" cy="11" r="7" />
               <path d="m20 20-3.6-3.6" />
             </svg>
@@ -427,9 +427,9 @@ function PosScreen({
                 key={p.id}
                 type="button"
                 onClick={() => addToCart(p)}
-                style={{ display: 'grid', gridTemplateColumns: '44px 1fr auto', alignItems: 'center', gap: 14, textAlign: 'left', background: '#fff', border: `1px solid ${color.border}`, borderRadius: 9, padding: '11px 14px', cursor: 'pointer' }}
+                style={{ display: 'grid', gridTemplateColumns: '44px 1fr auto', alignItems: 'center', gap: 14, textAlign: 'left', background: color.surface, border: `1px solid ${color.border}`, borderRadius: 6, padding: '11px 14px', cursor: 'pointer' }}
               >
-                <div style={{ width: 44, height: 44, borderRadius: 7, background: color.brandDark, border: '1px solid rgba(0,0,0,.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', font: `600 12px/1 ${font.mono}`, color: '#fff' }}>
+                <div style={{ width: 44, height: 44, borderRadius: 4, background: color.brandGreen, display: 'flex', alignItems: 'center', justifyContent: 'center', font: `600 12px/1 ${font.mono}`, color: '#fff' }}>
                   {p.sku.slice(0, 2).toUpperCase()}
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 3, minWidth: 0 }}>
@@ -440,14 +440,14 @@ function PosScreen({
               </button>
             ))}
             {filtered.length === 0 && (
-              <div style={{ padding: 34, textAlign: 'center', font: `400 13.5px/1.5 ${font.sans}`, color: color.textMuted, background: '#fff', border: `1px dashed ${color.borderStrong}`, borderRadius: 9 }}>
+              <div style={{ padding: 34, textAlign: 'center', font: `400 13.5px/1.5 ${font.sans}`, color: color.textMuted, background: color.surface, border: `1px dashed ${color.borderStrong}`, borderRadius: 6 }}>
                 Tidak ada produk cocok.
               </div>
             )}
           </div>
         </div>
 
-        <div style={{ width: 392, flex: 'none', background: '#fff', borderLeft: `1px solid ${color.borderStrong}`, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+        <div style={{ width: 392, flex: 'none', background: color.surface, borderLeft: `1px solid ${color.borderStrong}`, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
           <div style={{ padding: '14px 16px', borderBottom: `1px solid ${color.divider}`, display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', flex: 'none' }}>
             <span style={{ font: `600 13.5px/1 ${font.mono}`, color: color.text }}>Struk</span>
             <span style={{ font: `400 11.5px/1 ${font.mono}`, color: color.textMuted }}>{cart.reduce((a, l) => a + l.qty, 0)} item</span>
@@ -470,7 +470,7 @@ function PosScreen({
                     <button
                       type="button"
                       onClick={() => updateQty(l.product.id, -1)}
-                      style={{ width: 26, height: 26, border: `1px solid ${color.borderStrong}`, background: '#fff', borderRadius: 6, font: `600 15px/1 ${font.sans}`, color: color.textSubtle, cursor: 'pointer' }}
+                      style={{ width: 26, height: 26, border: `1px solid ${color.borderStrong}`, background: color.surfaceRaised, borderRadius: 4, font: `600 15px/1 ${font.sans}`, color: color.textSubtle, cursor: 'pointer' }}
                     >
                       −
                     </button>
@@ -478,7 +478,7 @@ function PosScreen({
                     <button
                       type="button"
                       onClick={() => updateQty(l.product.id, 1)}
-                      style={{ width: 26, height: 26, border: `1px solid ${color.borderStrong}`, background: '#fff', borderRadius: 6, font: `600 15px/1 ${font.sans}`, color: color.textSubtle, cursor: 'pointer' }}
+                      style={{ width: 26, height: 26, border: `1px solid ${color.borderStrong}`, background: color.surfaceRaised, borderRadius: 4, font: `600 15px/1 ${font.sans}`, color: color.textSubtle, cursor: 'pointer' }}
                     >
                       +
                     </button>
@@ -499,7 +499,7 @@ function PosScreen({
           <div style={{ flex: 'none', borderTop: `1px solid ${color.divider}`, padding: '14px 16px 16px', background: color.subtleBg }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', paddingTop: 11, borderTop: `1px dashed ${color.borderStrong}` }}>
               <span style={{ font: `600 15px/1 ${font.sans}` }}>Total</span>
-              <span style={{ font: `600 25px/1 ${font.mono}`, color: color.headerBg }}>{formatRupiah(cartTotal)}</span>
+              <span style={{ font: `600 25px/1 ${font.mono}`, color: color.successFg }}>{formatRupiah(cartTotal)}</span>
             </div>
             <p style={{ margin: '9px 0 12px', font: `400 10.5px/1.4 ${font.mono}`, color: color.textFaint }}>
               Angka ini perkiraan dari harga tersimpan lokal. Nilai final dihitung ulang di server saat sinkron.
@@ -559,7 +559,7 @@ function PayModal({
 
   return (
     <ModalOverlay>
-      <div style={{ width: 420, background: '#fff', borderRadius: 14, overflow: 'hidden', boxShadow: '0 20px 50px rgba(0,0,0,.3)' }}>
+      <div style={{ width: 420, background: color.surface, borderRadius: 8, overflow: 'hidden', boxShadow: '0 20px 50px rgba(0,0,0,.5)' }}>
         <div style={{ padding: '18px 22px', borderBottom: `1px solid ${color.divider}`, font: `600 16px/1 ${font.sans}` }}>Pembayaran</div>
         <div style={{ padding: 22 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '14px 16px', background: color.panelBg, borderRadius: 10 }}>
@@ -577,7 +577,7 @@ function PayModal({
                   padding: 12,
                   border: method === m ? `1.5px solid ${color.brandGreen}` : `1.5px solid ${color.borderStrong}`,
                   borderRadius: 10,
-                  background: method === m ? color.successBg : '#fff',
+                  background: method === m ? color.successBg : color.surfaceRaised,
                   color: method === m ? color.successFg : color.textSubtle,
                   font: `600 14px/1 ${font.sans}`,
                   cursor: 'pointer',
@@ -634,7 +634,7 @@ function Receipt({
 }) {
   return (
     <ModalOverlay>
-      <div style={{ width: 370, background: '#fff', borderRadius: 12, padding: '26px 24px', boxShadow: '0 20px 50px rgba(0,0,0,.3)', textAlign: 'center' }}>
+      <div style={{ width: 370, background: color.surface, borderRadius: 8, padding: '26px 24px', boxShadow: '0 20px 50px rgba(0,0,0,.5)', textAlign: 'center' }}>
         <div style={{ width: 52, height: 52, margin: '0 auto 14px', borderRadius: '50%', background: color.successBg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={color.brandGreen} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
             <path d="m5 13 4.5 4.5L19 7" />
@@ -644,7 +644,7 @@ function Receipt({
         <div style={{ marginTop: 6, font: `400 12.5px/1.5 ${font.mono}`, color: color.textMuted }}>{receipt.order_no}</div>
         <div
           id="print-receipt"
-          style={{ margin: '18px 0', padding: 16, border: `1px dashed ${color.borderStrong}`, borderRadius: 9, textAlign: 'left', font: `400 11.5px/1.75 ${font.mono}`, color: '#454F4A', background: color.subtleBg, whiteSpace: 'pre-wrap' }}
+          style={{ margin: '18px 0', padding: 16, border: `1px dashed ${color.borderStrong}`, borderRadius: 6, textAlign: 'left', font: `400 11.5px/1.75 ${font.mono}`, color: color.textSubtle, background: color.subtleBg, whiteSpace: 'pre-wrap' }}
         >
           {receipt.lines
             .map(
@@ -726,7 +726,7 @@ function CloseSessionModal({
 
   return (
     <ModalOverlay>
-      <div style={{ width: 460, background: '#fff', borderRadius: 14, overflow: 'hidden', boxShadow: '0 20px 50px rgba(0,0,0,.3)' }}>
+      <div style={{ width: 460, background: color.surface, borderRadius: 8, overflow: 'hidden', boxShadow: '0 20px 50px rgba(0,0,0,.5)' }}>
         <div style={{ padding: '18px 22px', borderBottom: `1px solid ${color.divider}`, font: `600 16px/1 ${font.sans}` }}>
           Tutup Sesi · {session.warehouse_code}
         </div>

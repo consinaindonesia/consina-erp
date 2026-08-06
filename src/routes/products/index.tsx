@@ -16,7 +16,7 @@ function ProductList() {
       <PageHeader
         title="Produk"
         right={
-          <Link to="/products/new" style={{ color: '#fff', font: `600 12.5px/1 ${font.sans}` }}>
+          <Link to="/products/new" style={{ color: color.successFg, font: `600 12.5px/1 ${font.sans}` }}>
             + Tambah produk
           </Link>
         }

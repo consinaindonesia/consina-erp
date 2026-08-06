@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { Badge, Card, CardBody, PageBody, PageShell } from '#/components/ui'
 import { supabase } from '#/lib/supabase'
-import { font } from '#/lib/theme'
+import { color, font } from '#/lib/theme'
 
 const checkSupabase = createServerFn({ method: 'GET' }).handler(async () => {
   if (!supabase) return { ok: false, message: 'VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY belum diatur' }
@@ -28,7 +28,7 @@ function Home() {
             <Badge tone={supabaseStatus.ok ? 'success' : 'danger'}>{supabaseStatus.ok ? 'Terhubung' : supabaseStatus.message}</Badge>
           </CardBody>
         </Card>
-        <p style={{ font: `400 13.5px/1.6 ${font.sans}`, color: '#5A6661' }}>
+        <p style={{ font: `400 13.5px/1.6 ${font.sans}`, color: color.textSubtle }}>
           Gunakan menu di atas untuk kelola produk, kategori, satuan, atribut, lokasi, persediaan, kasir, produksi, dan laporan.
         </p>
       </PageBody>

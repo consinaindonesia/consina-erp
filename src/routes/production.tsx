@@ -220,8 +220,8 @@ function Production() {
                     textAlign: 'left',
                     padding: 12,
                     border: `1px solid ${color.border}`,
-                    borderRadius: 9,
-                    background: selectedMoId === o.id ? color.successBg : '#fff',
+                    borderRadius: 6,
+                    background: selectedMoId === o.id ? color.successBg : color.surface,
                     cursor: 'pointer',
                   }}
                 >
